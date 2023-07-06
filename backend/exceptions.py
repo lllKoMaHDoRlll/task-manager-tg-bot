@@ -6,3 +6,7 @@ class ConfigLoadFailed(Exception):
 
 class MakingRequestFailed(Exception):
     """making request had failed"""
+
+
+class RepeatTimeFormattingFailed(Exception):
+    """Error with formatting repeat time"""
