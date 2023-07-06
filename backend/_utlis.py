@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import NoReturn
 
 from backend.data_classes import ConfigData
-from backend.exceptions import ConfigLoadFailed
+from backend.exceptions import ConfigLoadFailed, MakingRequestFailed
 
 
 def get_config(config_path: Path = Path("./data/config.json")) -> ConfigData:
@@ -20,4 +20,10 @@ def get_config(config_path: Path = Path("./data/config.json")) -> ConfigData:
         raise ConfigLoadFailed
 
 
-
+async def make_request_get(url: str, params: dict | None = None) -> str | NoReturn:
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params=params) as resp:
+                return await resp.json()
+    except:
+        raise MakingRequestFailed
