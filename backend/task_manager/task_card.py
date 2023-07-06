@@ -1,10 +1,11 @@
 from typing import NoReturn
 
 from backend.data_classes import PriorityLevel
+from backend.task_manager.folder import Folder
 
 
 class TaskCard:
-    def __init__(self, name: str, parent, description: str = "", due_date=None, repeat=None,
+    def __init__(self, name: str, parent: Folder, description: str = "", due_date=None, repeat=None,
                  priority: PriorityLevel = PriorityLevel.NO):
         self.name = name
         self.parent = parent
@@ -16,7 +17,7 @@ class TaskCard:
     def get_attrs(self) -> dict:
         data = dict()
         data["name"] = self.name
-        data["parent"] = self.parent
+        data["parent"] = self.parent.id
         data["description"] = self.description
         data["due_date"] = self.due_date
         data["repeat"] = self.repeat
@@ -28,7 +29,7 @@ class TaskCard:
         self.name = new_name
         return self.name
 
-    def edit_parent(self, new_parent):
+    def edit_parent(self, new_parent: Folder) -> Folder:
         self.parent = new_parent
         return self.parent
 
