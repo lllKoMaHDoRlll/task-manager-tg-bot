@@ -3,6 +3,7 @@ from pathlib import Path
 
 from backend.data_classes import PriorityLevel
 from backend.task_manager.task_card import TaskCard
+from backend.exceptions import FolderLoadFailed
 
 
 class Folder:
@@ -12,7 +13,18 @@ class Folder:
         self.active_tasks = []
 
     def load(self, path: Path):
-        raise NotImplemented
+        if path.exists():
+            try:
+                with open(path, "r") as file:
+                    data = json.load(file)
+
+                for task in data:
+                    self.add_task(**task)
+            except:
+                raise FolderLoadFailed
+        else:
+            raise FolderLoadFailed
+
 
     def save(self, path: Path):
         raise NotImplemented
