@@ -14,11 +14,4 @@ class PriorityLevel(Enum):
     NO = 4
 
 
-class Weekdays(Enum):
-    MONDAY = "Mon"
-    TUESDAY = "Tue"
-    WEDNESDAY = "Wed"
-    THURSDAY = "Thu"
-    FRIDAY = "Fri"
-    SATURDAY = "Sat"
-    SUNDAY = "Sun"
+WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
