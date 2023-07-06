@@ -10,3 +10,7 @@ class MakingRequestFailed(Exception):
 
 class RepeatTimeFormattingFailed(Exception):
     """Error with formatting repeat time"""
+
+
+class FolderLoadFailed(Exception):
+    """Error with loading folder data"""
