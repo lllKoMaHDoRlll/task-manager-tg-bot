@@ -3,8 +3,8 @@ import aiohttp
 from pathlib import Path
 from typing import NoReturn
 
-from backend.data_classes import ConfigData
-from backend.exceptions import ConfigLoadFailed, MakingRequestFailed
+from backend.data_classes import ConfigData, WEEKDAYS
+from backend.exceptions import ConfigLoadFailed, MakingRequestFailed, RepeatTimeFormattingFailed
 
 
 def get_config(config_path: Path = Path("./data/config.json")) -> ConfigData:
@@ -27,3 +27,22 @@ async def make_request_get(url: str, params: dict | None = None) -> str | NoRetu
                 return await resp.json()
     except:
         raise MakingRequestFailed
+
+
+def format_repeat_time(repeat_text: str) -> int | NoReturn:
+    try:
+        repeat_text = repeat_text.split()
+        if repeat_text[0] != 'every':
+            raise RepeatTimeFormattingFailed
+        if repeat_text[1] == 'day':
+            delta = 86400
+        elif repeat_text[1] in WEEKDAYS:
+            delta = 86400 * 7
+        elif repeat_text[1].isdecimal() and repeat_text[2] == 'days':
+            delta = 86400 * int(repeat_text[1])
+        else:
+            raise RepeatTimeFormattingFailed
+
+        return delta
+    except:
+        raise RepeatTimeFormattingFailed
