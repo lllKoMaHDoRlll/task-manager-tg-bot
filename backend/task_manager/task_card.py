@@ -49,7 +49,7 @@ class TaskCard:
         return self.priority
 
     def delete(self) -> NoReturn:
-        raise NotImplemented
+        self.parent.remove_task(self)
 
     def complete(self) -> NoReturn:
         raise NotImplemented
