@@ -6,8 +6,9 @@ from backend.task_manager.task_card import TaskCard
 
 
 class Folder:
-    def __init__(self, user_id: int):
+    def __init__(self, user_id: int, id_: int):
         self.user_id = user_id
+        self.id = id_
         self.active_tasks = []
 
     def load(self, path: Path):
