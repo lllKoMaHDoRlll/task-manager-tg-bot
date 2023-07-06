@@ -25,9 +25,8 @@ class Folder:
         else:
             raise FolderLoadFailed
 
-
-    def save(self, path: Path):
-        raise NotImplemented
+    def save(self, path: Path) -> None:
+        json.dump(self.active_tasks, path.open("w"))
 
     def add_task(self, name: str, parent, description: str = "", due_date=None, repeat=None,
                  priority: PriorityLevel = PriorityLevel.NO) -> TaskCard:
