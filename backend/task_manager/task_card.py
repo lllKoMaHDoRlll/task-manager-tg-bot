@@ -13,6 +13,17 @@ class TaskCard:
         self.repeat = repeat
         self.priority = priority
 
+    def get_attrs(self) -> dict:
+        data = dict()
+        data["name"] = self.name
+        data["parent"] = self.parent
+        data["description"] = self.description
+        data["due_date"] = self.due_date
+        data["repeat"] = self.repeat
+        data["priority"] = self.priority.value
+
+        return data
+
     def edit_name(self, new_name: str) -> str:
         self.name = new_name
         return self.name
