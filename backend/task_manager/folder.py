@@ -28,9 +28,9 @@ class Folder:
     def save(self, path: Path) -> None:
         json.dump([task.get_attrs() for task in self.active_tasks], path.open("w"), indent=4)
 
-    def add_task(self, name: str, parent, description: str = "", due_date=None, repeat=None,
-                 priority: PriorityLevel = PriorityLevel.NO) -> TaskCard:
-        task = TaskCard(name, parent, description, due_date, repeat, priority)
+    def add_task(self, name: str, parent=None, description: str = "", due_date=None, repeat=None,
+                 priority: int = 4) -> TaskCard:
+        task = TaskCard(name, self, description, due_date, repeat, PriorityLevel(int))
         self.active_tasks.append(task)
         return task
 
