@@ -35,4 +35,15 @@ class TaskManagerHandler:
     def save(self):
         raise NotImplemented
 
+    @staticmethod
+    def get_available_folder_id(path: Path):
+        files = [int(file[:5]) for file in os.listdir(path)]
+
+        prob_id = 0
+        for _ in range(len(files)):
+            if prob_id not in files:
+                return int(prob_id)
+            prob_id += 1
+        return int(prob_id) + 1
+
 
