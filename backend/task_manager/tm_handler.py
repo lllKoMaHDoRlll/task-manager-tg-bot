@@ -17,7 +17,6 @@ class TaskManagerHandler:
                     path_to_user = self.data_path.joinpath(user_id)
                     folders = []
                     for folder_id in os.listdir(path_to_user):
-                        print(folder_id[:-5])
                         path_to_folder = path_to_user.joinpath(folder_id)
                         folder = Folder(int(user_id), int(folder_id[:-5]))
                         folder.load(path_to_folder)
