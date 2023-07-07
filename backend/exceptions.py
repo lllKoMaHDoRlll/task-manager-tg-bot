@@ -12,5 +12,5 @@ class RepeatTimeFormattingFailed(Exception):
     """Error with formatting repeat time"""
 
 
-class FolderLoadFailed(Exception):
-    """Error with loading folder data"""
+class LoadFailed(Exception):
+    """Error with loading data"""
