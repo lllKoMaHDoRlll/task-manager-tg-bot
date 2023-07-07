@@ -30,10 +30,12 @@ class TaskManagerHandler:
         else:
             raise LoadFailed
 
-
-
     def save(self):
-        raise NotImplemented
+        for user_id in self.folders:
+            path_to_user = self.data_path.joinpath(user_id)
+            for folder in self.folders[user_id]:
+                path_to_folder = path_to_user.joinpath(f"{folder.id}.json")
+                folder.save(path_to_folder)
 
     @staticmethod
     def get_available_folder_id(path: Path):
@@ -45,5 +47,3 @@ class TaskManagerHandler:
                 return int(prob_id)
             prob_id += 1
         return int(prob_id) + 1
-
-
