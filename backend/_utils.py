@@ -1,0 +1,48 @@
+import json
+import aiohttp
+from pathlib import Path
+from typing import NoReturn
+
+from backend.data_classes import ConfigData, WEEKDAYS
+from backend.exceptions import ConfigLoadFailed, MakingRequestFailed, RepeatTimeFormattingFailed
+
+
+def get_config(config_path: Path = Path("./data/config.json")) -> ConfigData:
+    if config_path.exists():
+        try:
+            with open(config_path, "r") as file:
+                config_data = json.load(file)
+            config_data = ConfigData(**config_data)
+            return config_data
+        except:
+            raise ConfigLoadFailed
+    else:
+        raise ConfigLoadFailed
+
+
+async def make_request_get(url: str, params: dict | None = None) -> str | NoReturn:
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params=params) as resp:
+                return await resp.json()
+    except:
+        raise MakingRequestFailed
+
+
+def format_repeat_time(repeat_text: str) -> int | NoReturn:
+    try:
+        repeat_text = repeat_text.split()
+        if repeat_text[0] != 'every':
+            raise RepeatTimeFormattingFailed
+        if repeat_text[1] == 'day':
+            delta = 86400
+        elif repeat_text[1] in WEEKDAYS:
+            delta = 86400 * 7
+        elif repeat_text[1].isdecimal() and repeat_text[2] == 'days':
+            delta = 86400 * int(repeat_text[1])
+        else:
+            raise RepeatTimeFormattingFailed
+
+        return delta
+    except:
+        raise RepeatTimeFormattingFailed
