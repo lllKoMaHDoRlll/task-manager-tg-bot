@@ -30,7 +30,7 @@ class Folder:
 
     def add_task(self, name: str, parent=None, description: str = "", due_date=None, repeat=None,
                  priority: int = 4) -> TaskCard:
-        task = TaskCard(name, self, description, due_date, repeat, PriorityLevel(int))
+        task = TaskCard(name, self, description, due_date, repeat, PriorityLevel(priority))
         self.active_tasks.append(task)
         return task
 
