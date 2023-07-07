@@ -24,6 +24,11 @@ async def start_command(message: Message) -> None:
     await message.answer("Hello! This is your Task Manager Bot.\nYou can list your task with /tasks")
 
 
+@DP.message(Command(commands=['ping']))
+async def ping_command(message: Message) -> None:
+    await message.answer("pong")
+
+
 if __name__ == '__main__':
 
     bot = Bot(token=CONFIG.token)
