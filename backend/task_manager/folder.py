@@ -12,7 +12,7 @@ class Folder:
         self.id = id_
         self.active_tasks = []
 
-    def load(self, path: Path):
+    def load(self, path: Path) -> None:
         if path.exists():
             try:
                 with open(path, "r") as file:
