@@ -10,6 +10,12 @@ class TaskManagerHandler:
         self.folders = dict()
         self.data_path = data_path
 
+    def get_folders_by_user_id(self, user_id: int) -> dict:
+        if str(user_id) in self.folders.keys():
+            return {user_id: self.folders[str(user_id)]}
+        else:
+            return {user_id: []}
+
     def load(self):
         if self.data_path.exists():
             try:
