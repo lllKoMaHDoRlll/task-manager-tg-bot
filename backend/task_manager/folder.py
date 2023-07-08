@@ -10,7 +10,7 @@ class Folder:
     def __init__(self, user_id: int, id_: int):
         self.user_id = user_id
         self.id = id_
-        self.active_tasks = []
+        self.active_tasks = dict()
 
     def load(self, path: Path) -> None:
         if path.exists():
@@ -26,13 +26,21 @@ class Folder:
             raise LoadFailed
 
     def save(self, path: Path) -> None:
-        json.dump([task.get_attrs() for task in self.active_tasks], path.open("w"), indent=4)
+        json.dump({task.id: task.get_attrs() for task in self.active_tasks}, path.open("w"), indent=4)
+
+    def get_available_task_id(self):
+        tasks_ids = [task.id for task in self.active_tasks]
+        for index in range(len(tasks_ids)):
+            if index not in tasks_ids:
+                return index
+        return len(tasks_ids)
 
     def add_task(self, name: str, parent=None, description: str = "", due_date=None, repeat=None,
                  priority: int = 4) -> TaskCard:
-        task = TaskCard(name, self, description, due_date, repeat, PriorityLevel(priority))
-        self.active_tasks.append(task)
+        task = TaskCard(self.get_available_task_id(), name, self, description, due_date, repeat, PriorityLevel(priority))
+        self.active_tasks.update({task.id: task})
         return task
 
     def remove_task(self, task: TaskCard) -> None:
-        self.active_tasks.remove(task)
+        self.active_tasks.pop(task.id)
+

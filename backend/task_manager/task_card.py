@@ -4,8 +4,9 @@ from backend.data_classes import PriorityLevel
 
 
 class TaskCard:
-    def __init__(self, name: str, parent, description: str = "", due_date=None, repeat=None,
+    def __init__(self, id_: int, name: str, parent, description: str = "", due_date=None, repeat=None,
                  priority: PriorityLevel = PriorityLevel.NO):
+        self.id = id_
         self.name = name
         self.parent = parent
         self.description = description
@@ -15,6 +16,7 @@ class TaskCard:
 
     def get_attrs(self) -> dict:
         data = dict()
+        data["id"] = self.id
         data["name"] = self.name
         data["parent"] = self.parent.id
         data["description"] = self.description
