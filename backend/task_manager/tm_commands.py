@@ -55,6 +55,10 @@ class TaskManagerCommands:
             self.add_task_request_name_command,
             StateFilter(FSMTaskManager.select_folder_action), Text(startswith=['addtask'])
         )
+        dispatcher.message.register(
+            self.add_task_request_description_command,
+            StateFilter(FSMTaskManager.new_task_request_name)
+        )
         # dispatcher.message.register(
         #     self.show_task_command,
         #     Command(commands=['task']), StateFilter(FSMTaskManager.request_task)
@@ -195,6 +199,12 @@ class TaskManagerCommands:
         await callback.message.answer("Enter task's name")
         await state.set_state(FSMTaskManager.new_task_request_name)
 
+    @staticmethod
+    async def add_task_request_description_command(message: Message, state: FSMContext):
+        (await state.get_data())["new_task"].update({"name": message.text})
+        await message.answer("Enter task's description ( '-' for empty)")
+        await state.set_state(FSMTaskManager.new_task_request_description)
+
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
         prev_state = await state.get_state()
         match prev_state:
@@ -211,4 +221,5 @@ class FSMTaskManager(StatesGroup):
     select_folders_action = State()
     select_folder_action = State()
     new_task_request_name = State()
+    new_task_request_description = State()
 
