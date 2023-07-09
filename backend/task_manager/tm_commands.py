@@ -142,7 +142,7 @@ class TaskManagerCommands:
     def get_keyboard_show_folder(self, tasks: dict[int:TaskCard]) -> InlineKeyboardMarkup:
         add_task_button = InlineKeyboardButton(text="Add task", callback_data="addtask")
         edit_folder_button = InlineKeyboardButton(text= "Edit folder", callback_data="editfolder")
-        delete_folder_button = InlineKeyboardButton(text= "Delete folder", callback_data="editfolder")
+        delete_folder_button = InlineKeyboardButton(text= "Delete folder", callback_data="deletefolder")
         keyboard_markup = [[add_task_button], [edit_folder_button, delete_folder_button], []]
         row_index = 2
         if tasks:
