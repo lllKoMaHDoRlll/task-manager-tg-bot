@@ -1,17 +1,16 @@
-from aiogram.filters.state import State, StatesGroup
-from aiogram.filters import Command, CommandStart, StateFilter, Text, and_f, or_f
-from aiogram import Dispatcher
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import default_state
-from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import (CallbackQuery, InlineKeyboardButton,
-                           InlineKeyboardMarkup, Message, PhotoSize)
-
 from asyncio import sleep
 
-from backend.task_manager.tm_handler import TaskManagerHandler
+from aiogram import Dispatcher
+from aiogram.filters import Command, StateFilter, Text
+from aiogram.filters.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import default_state
+from aiogram.types import (CallbackQuery, InlineKeyboardButton,
+                           InlineKeyboardMarkup, Message)
+
 from backend.task_manager.folder import Folder
 from backend.task_manager.task_card import TaskCard
+from backend.task_manager.tm_handler import TaskManagerHandler
 
 
 class TaskManagerCommands:
@@ -53,7 +52,8 @@ class TaskManagerCommands:
             Command(commands=['task']), StateFilter(FSMTaskManager.request_task)
         )
 
-    async def proceed_exit_command(self, message: Message | CallbackQuery, state: FSMContext):
+    @staticmethod
+    async def proceed_exit_command(message: Message | CallbackQuery, state: FSMContext):
         left_message = await message.answer("You left dialog.")
         await sleep(1)
         await (await state.get_data())["message"].delete()
@@ -77,7 +77,9 @@ class TaskManagerCommands:
         await main_message.edit_text(msg_text)
         await main_message.edit_reply_markup(reply_markup=keyboard)
         await state.set_state(FSMTaskManager.select_folders_action)
-    def get_text_show_folders(self, folders: list[Folder]) -> str:
+
+    @staticmethod
+    def get_text_show_folders(folders: list[Folder]) -> str:
         if folders:
             msg_text = 'Your folders:\n\n'
 
@@ -88,7 +90,8 @@ class TaskManagerCommands:
 
         return msg_text
 
-    def get_keyboard_show_folders(self, folders: list[Folder]) -> InlineKeyboardMarkup:
+    @staticmethod
+    def get_keyboard_show_folders(folders: list[Folder]) -> InlineKeyboardMarkup:
         add_task_button = InlineKeyboardButton(text="Add folder", callback_data="addfolder")
         keyboard_markup = [[add_task_button], []]
 
@@ -116,7 +119,6 @@ class TaskManagerCommands:
         await callback.answer(text="Folder was created")
         await self.update_show_folders_command(callback, state)
 
-
     async def show_folder_command(self, callback: CallbackQuery, state: FSMContext):
         folders = self.task_manager_handler.folders[str(callback.from_user.id)]
         tasks = {}
@@ -133,7 +135,8 @@ class TaskManagerCommands:
         await state.set_state(FSMTaskManager.select_folder_action)
         await callback.message.edit_text(msg_text, reply_markup=keyboard)
 
-    def get_text_show_folder(self, tasks: dict[int:TaskCard], callback: CallbackQuery) -> str:
+    @staticmethod
+    def get_text_show_folder(tasks: dict[int:TaskCard], callback: CallbackQuery) -> str:
         msg_text = f"Folder: {callback.data.split('_')[1]}\n\n"
         if tasks:
 
@@ -147,7 +150,8 @@ class TaskManagerCommands:
 
         return msg_text
 
-    def get_keyboard_show_folder(self, tasks: dict[int:TaskCard]) -> InlineKeyboardMarkup:
+    @staticmethod
+    def get_keyboard_show_folder(tasks: dict[int:TaskCard]) -> InlineKeyboardMarkup:
         add_task_button = InlineKeyboardButton(text="Add task", callback_data="addtask")
         edit_folder_button = InlineKeyboardButton(text="Edit folder", callback_data="editfolder")
         delete_folder_button = InlineKeyboardButton(text="Delete folder", callback_data="deletefolder")
@@ -179,7 +183,8 @@ class TaskManagerCommands:
             case FSMTaskManager.select_folder_action:
                 await self.update_show_folders_command(callback, state)
 
-    async def show_task_command(self, message: Message, state: FSMContext):
+    @staticmethod
+    async def show_task_command(message: Message, state: FSMContext):
         await message.answer("show task")
         await state.clear()
 
