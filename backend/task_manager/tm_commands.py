@@ -232,6 +232,7 @@ class TaskManagerCommands:
 
     async def delete_folder_command(self, callback: CallbackQuery, state: FSMContext):
         folder: Folder = (await state.get_data())["selected_folder"]
+        await callback.answer(labels.DELETE_FOLDER_ALERT.format(folder_id=folder.id))
         self.task_manager_handler.delete_folder(folder)
         await self.update_show_folders_command(callback, state)
 
