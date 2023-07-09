@@ -68,6 +68,10 @@ class TaskManagerCommands:
             self.add_task_request_repeat_command,
             StateFilter(FSMTaskManager.new_task_request_due_date), SimpleCalendarCallback.filter()
         )
+        dispatcher.message.register(
+            self.add_task_request_priority_command,
+            StateFilter(FSMTaskManager.new_task_request_repeat)
+        )
         # dispatcher.message.register(
         #     self.show_task_command,
         #     Command(commands=['task']), StateFilter(FSMTaskManager.request_task)
