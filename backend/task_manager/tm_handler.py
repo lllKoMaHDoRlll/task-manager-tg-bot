@@ -16,6 +16,14 @@ class TaskManagerHandler:
         else:
             return {user_id: []}
 
+    def add_folder(self, user_id: int) -> None:
+        folder_path = self.data_path.joinpath(str(user_id))
+        if not folder_path.exists():
+            os.mkdir(folder_path)
+        folder_id = self.get_available_folder_id(folder_path)
+        folder = Folder(user_id, folder_id)
+        self.folders.update({str(folder_id): folder})
+
     def load(self):
         if self.data_path.exists():
             try:
