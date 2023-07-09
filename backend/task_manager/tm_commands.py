@@ -69,6 +69,14 @@ class TaskManagerCommands:
         main_message = await message.answer(msg_text, reply_markup=keyboard)
         await state.update_data(message=main_message, prev_state=default_state)
 
+    async def update_show_folders_command(self, callback: CallbackQuery, state: FSMContext):
+        main_message: Message = (await state.get_data())["message"]
+        folders = self.task_manager_handler.get_folders_by_user_id(callback.from_user.id)[callback.from_user.id]
+        msg_text = self.get_text_show_folders(folders)
+        keyboard = self.get_keyboard_show_folders(folders)
+        await main_message.edit_text(msg_text)
+        await main_message.edit_reply_markup(reply_markup=keyboard)
+        await state.set_state(FSMTaskManager.select_folders_action)
     def get_text_show_folders(self, folders: list[Folder]) -> str:
         if folders:
             msg_text = 'Your folders:\n\n'
@@ -104,15 +112,10 @@ class TaskManagerCommands:
         return keyboard
 
     async def add_folder(self, callback: CallbackQuery, state: FSMContext):
-        main_message: Message = (await state.get_data())["message"]
         self.task_manager_handler.add_folder(callback.from_user.id)
         await callback.answer(text="Folder was created")
-        folders = self.task_manager_handler.get_folders_by_user_id(callback.from_user.id)[callback.from_user.id]
-        msg_text = self.get_text_show_folders(folders)
-        keyboard = self.get_keyboard_show_folders(folders)
-        await main_message.edit_text(msg_text)
-        await main_message.edit_reply_markup(reply_markup=keyboard)
-        await state.set_state(FSMTaskManager.select_folders_action)
+        await self.update_show_folders_command(callback, state)
+
 
     async def show_folder_command(self, callback: CallbackQuery, state: FSMContext):
         folders = self.task_manager_handler.folders[str(callback.from_user.id)]
@@ -146,8 +149,8 @@ class TaskManagerCommands:
 
     def get_keyboard_show_folder(self, tasks: dict[int:TaskCard]) -> InlineKeyboardMarkup:
         add_task_button = InlineKeyboardButton(text="Add task", callback_data="addtask")
-        edit_folder_button = InlineKeyboardButton(text= "Edit folder", callback_data="editfolder")
-        delete_folder_button = InlineKeyboardButton(text= "Delete folder", callback_data="deletefolder")
+        edit_folder_button = InlineKeyboardButton(text="Edit folder", callback_data="editfolder")
+        delete_folder_button = InlineKeyboardButton(text="Delete folder", callback_data="deletefolder")
         keyboard_markup = [[add_task_button], [edit_folder_button, delete_folder_button], []]
         row_index = 2
         if tasks:
@@ -168,28 +171,13 @@ class TaskManagerCommands:
     async def delete_folder_command(self, callback: CallbackQuery, state: FSMContext):
         folder: Folder = (await state.get_data())["selected_folder"]
         self.task_manager_handler.delete_folder(folder)
-        message: Message = (await state.get_data())["message"]
-        folders = self.task_manager_handler.get_folders_by_user_id(callback.from_user.id)[callback.from_user.id]
-        await state.update_data(selected_folder=None)
-        msg_text = self.get_text_show_folders(folders)
-        keyboard = self.get_keyboard_show_folders(folders)
-        await message.edit_text(msg_text)
-        await message.edit_reply_markup(reply_markup=keyboard)
-        await state.set_state(FSMTaskManager.select_folders_action)
+        await self.update_show_folders_command(callback, state)
 
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
         prev_state = await state.get_state()
         match prev_state:
             case FSMTaskManager.select_folder_action:
-                message: Message = (await state.get_data())["message"]
-                folders = self.task_manager_handler.get_folders_by_user_id(callback.from_user.id)[callback.from_user.id]
-                await state.update_data(selected_folder=None)
-                msg_text = self.get_text_show_folders(folders)
-                keyboard = self.get_keyboard_show_folders(folders)
-                await message.edit_text(msg_text)
-                await message.edit_reply_markup(reply_markup=keyboard)
-                await state.set_state(FSMTaskManager.select_folders_action)
-
+                await self.update_show_folders_command(callback, state)
 
     async def show_task_command(self, message: Message, state: FSMContext):
         await message.answer("show task")
