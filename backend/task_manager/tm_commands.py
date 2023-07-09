@@ -109,13 +109,14 @@ class TaskManagerCommands:
         await state.set_state(FSMTaskManager.select_folder_action)
 
     async def show_folder_command(self, callback: CallbackQuery, state: FSMContext):
-        await state.update_data(folder_id=int(callback.data.split('_')[1]))
         folders = self.task_manager_handler.folders[str(callback.from_user.id)]
         tasks = {}
+        selected_folder = None
         for folder in folders:
             if folder.id == int(callback.data.split('_')[1]):
                 selected_folder = folder
                 tasks = selected_folder.active_tasks
+        await state.update_data(selected_folder=selected_folder)
 
         msg_text = self.get_text_show_folder(tasks, callback)
         keyboard = self.get_keyboard_show_folder(tasks)
