@@ -104,6 +104,7 @@ class TaskManagerCommands:
 
     async def update_show_folders_command(self, callback: CallbackQuery, state: FSMContext):
         main_message: Message = (await state.get_data())["message"]
+        await state.update_data(selected_folder=None)
         folders = self.task_manager_handler.get_folders_by_user_id(callback.from_user.id)[callback.from_user.id]
         msg_text = self.get_text_show_folders(folders)
         keyboard = self.get_keyboard_show_folders(folders)
@@ -289,6 +290,7 @@ class TaskManagerCommands:
                 folder.add_task(**new_task_data)
             case "no":
                 pass
+        await state.update_data(new_task=None)
         await self.update_show_folder_command(callback, state)
 
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
