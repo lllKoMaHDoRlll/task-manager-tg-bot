@@ -49,7 +49,8 @@ class TaskManagerCommands:
         left_message = await message.answer("You left dialog.")
         await sleep(1)
         await (await state.get_data())["message"].delete()
-        await left_message.delete()
+        if isinstance(message, Message):
+            await left_message.delete()
         await state.clear()
 
     async def proceed_back_command(self, callback: CallbackQuery, state: FSMContext):
@@ -142,7 +143,7 @@ class TaskManagerCommands:
         add_task_button = InlineKeyboardButton(text="Add task", callback_data="addtask")
         edit_folder_button = InlineKeyboardButton(text= "Edit folder", callback_data="editfolder")
         delete_folder_button = InlineKeyboardButton(text= "Delete folder", callback_data="editfolder")
-        keyboard_markup = [[add_task_button], [edit_folder_button, delete_folder_button]]
+        keyboard_markup = [[add_task_button], [edit_folder_button, delete_folder_button], []]
         row_index = 2
         if tasks:
 
@@ -152,8 +153,10 @@ class TaskManagerCommands:
                 row_index += 1
                 keyboard_markup.append([])
 
-        button = InlineKeyboardButton(text="back", callback_data="back")
-        keyboard_markup[row_index].append(button)
+        back_button = InlineKeyboardButton(text="back", callback_data="back")
+        exit_button = InlineKeyboardButton(text="exit", callback_data="exit")
+        keyboard_markup[row_index].append(back_button)
+        keyboard_markup[row_index].append(exit_button)
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
         return keyboard
 
