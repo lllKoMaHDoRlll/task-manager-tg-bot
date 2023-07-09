@@ -76,6 +76,10 @@ class TaskManagerCommands:
             self.add_task_confirm,
             StateFilter(FSMTaskManager.new_task_request_priority), Text(startswith="priority")
         )
+        dispatcher.callback_query.register(
+            self.proceed_add_task,
+            StateFilter(FSMTaskManager.new_task_request_confirm), Text(startswith="confirm")
+        )
         # dispatcher.message.register(
         #     self.show_task_command,
         #     Command(commands=['task']), StateFilter(FSMTaskManager.request_task)
@@ -158,15 +162,25 @@ class TaskManagerCommands:
                 tasks = selected_folder.active_tasks
         await state.update_data(selected_folder=selected_folder)
 
-        msg_text = self.get_text_show_folder(tasks, callback)
+        msg_text = self.get_text_show_folder(tasks, selected_folder.id)
         keyboard = self.get_keyboard_show_folder(tasks)
 
         await state.set_state(FSMTaskManager.select_folder_action)
         await callback.message.edit_text(msg_text, reply_markup=keyboard)
 
+    async def update_show_folder_command(self, callback: CallbackQuery, state: FSMContext):
+        selected_folder = (await state.get_data())["selected_folder"]
+        tasks = selected_folder.active_tasks
+        msg_text = self.get_text_show_folder(tasks, selected_folder.id)
+        keyboard = self.get_keyboard_show_folder(tasks)
+        await state.set_state(FSMTaskManager.select_folder_action)
+        main_message = await callback.message.answer(msg_text, reply_markup=keyboard)
+        await state.set_state(FSMTaskManager.select_folder_action)
+        await state.update_data(message=main_message)
+
     @staticmethod
-    def get_text_show_folder(tasks: dict[int:TaskCard], callback: CallbackQuery) -> str:
-        msg_text = f"Folder: {callback.data.split('_')[1]}\n\n"
+    def get_text_show_folder(tasks: dict[int:TaskCard], folder_id: int) -> str:
+        msg_text = f"Folder: {folder_id}\n\n"
         if tasks:
 
             row_index = 1
@@ -266,6 +280,16 @@ class TaskManagerCommands:
         keyboard_markup = [[InlineKeyboardButton(text="Yes", callback_data="confirm_yes"), InlineKeyboardButton(text="No", callback_data="confirm_no")]]
         await callback.message.answer(msg_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
         await state.set_state(FSMTaskManager.new_task_request_confirm)
+
+    async def proceed_add_task(self, callback: CallbackQuery, state: FSMContext):
+        match callback.data.split("_")[1]:
+            case "yes":
+                folder: Folder = (await state.get_data())["selected_folder"]
+                new_task_data: dict = (await state.get_data())["new_task"]
+                folder.add_task(**new_task_data)
+            case "no":
+                pass
+        await self.update_show_folder_command(callback, state)
 
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
         prev_state = await state.get_state()
