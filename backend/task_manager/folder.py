@@ -18,8 +18,8 @@ class Folder:
                 with open(path, "r") as file:
                     data = json.load(file)
 
-                for task in data:
-                    self.add_task(**task)
+                for task_id in data:
+                    self.add_task(**(data[task_id]))
             except:
                 raise LoadFailed
         else:
@@ -29,13 +29,13 @@ class Folder:
         json.dump({task.id: task.get_attrs() for task in self.active_tasks}, path.open("w"), indent=4)
 
     def get_available_task_id(self):
-        tasks_ids = [task.id for task in self.active_tasks]
+        tasks_ids = [task.id for task in self.active_tasks.values()]
         for index in range(len(tasks_ids)):
             if index not in tasks_ids:
                 return index
         return len(tasks_ids)
 
-    def add_task(self, name: str, parent=None, description: str = "", due_date=None, repeat=None,
+    def add_task(self, id: int, name: str, parent=None, description: str = "", due_date=None, repeat=None,
                  priority: int = 4) -> TaskCard:
         task = TaskCard(self.get_available_task_id(), name, self, description, due_date, repeat, PriorityLevel(priority))
         self.active_tasks.update({task.id: task})
