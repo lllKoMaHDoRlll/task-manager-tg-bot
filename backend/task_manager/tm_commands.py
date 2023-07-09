@@ -67,7 +67,7 @@ class TaskManagerCommands:
             StateFilter(FSMTaskManager.new_task_request_description)
         )
         dispatcher.callback_query.register(
-            self.proceed_due_date,
+            self.add_task_request_repeat_command,
             StateFilter(FSMTaskManager.new_task_request_due_date), SimpleCalendarCallback.filter()
         )
         # dispatcher.message.register(
@@ -227,7 +227,7 @@ class TaskManagerCommands:
         await state.set_state(FSMTaskManager.new_task_request_due_date)
 
     @staticmethod
-    async def proceed_due_date(callback: CallbackQuery, callback_data: dict, state: FSMContext):
+    async def add_task_request_repeat_command(callback: CallbackQuery, callback_data: dict, state: FSMContext):
         inline_calendar: SimpleCalendar = (await state.get_data())["inline_calendar"]
         selected, date = await inline_calendar.process_selection(callback, callback_data)
         if selected:
