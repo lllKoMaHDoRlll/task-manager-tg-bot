@@ -72,6 +72,10 @@ class TaskManagerCommands:
             self.add_task_request_priority_command,
             StateFilter(FSMTaskManager.new_task_request_repeat)
         )
+        dispatcher.callback_query.register(
+            self.add_task_confirm,
+            StateFilter(FSMTaskManager.new_task_request_priority), Text(startswith="priority")
+        )
         # dispatcher.message.register(
         #     self.show_task_command,
         #     Command(commands=['task']), StateFilter(FSMTaskManager.request_task)
@@ -240,7 +244,7 @@ class TaskManagerCommands:
     @staticmethod
     async def add_task_request_priority_command(message: Message, state: FSMContext):
         if message.text != '-':
-            (await state.get_data()).update({"repeat": message.text})
+            (await state.get_data())["new_task"].update({"repeat": message.text})
 
         msg_text = "Select priority"
         keyboard_markup = [[
@@ -251,6 +255,17 @@ class TaskManagerCommands:
         ]]
         await message.answer(text=msg_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
         await state.set_state(FSMTaskManager.new_task_request_priority)
+
+    @staticmethod
+    async def add_task_confirm(callback: CallbackQuery, state: FSMContext):
+        (await state.get_data())["new_task"].update({"priority": callback.data.split('_')[1]})
+        task_data = (await state.get_data())["new_task"]
+        msg_text = "There's your new task:\n"
+        msg_text += str(task_data)
+        msg_text += "\nConfirm?"
+        keyboard_markup = [[InlineKeyboardButton(text="Yes", callback_data="confirm_yes"), InlineKeyboardButton(text="No", callback_data="confirm_no")]]
+        await callback.message.answer(msg_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
+        await state.set_state(FSMTaskManager.new_task_request_confirm)
 
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
         prev_state = await state.get_state()
@@ -272,3 +287,4 @@ class FSMTaskManager(StatesGroup):
     new_task_request_due_date = State()
     new_task_request_repeat = State()
     new_task_request_priority = State()
+    new_task_request_confirm = State()
