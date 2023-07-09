@@ -24,6 +24,8 @@ ADD_TASK_BUTTON = "⭐️ Add task"
 EDIT_FOLDER_BUTTON = "✏️ Edit folder"
 DELETE_FOLDER_BUTTON = "🗑 Delete folder"
 
+DELETE_FOLDER_ALERT = "❌ Folder № {folder_id} was deleted."
+
 TASK_THUMBNAIL = "📕 {name}"
 
 REQUEST_TASK_NAME = "✍️ Enter task's name.🔴"
