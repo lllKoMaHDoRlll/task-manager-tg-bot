@@ -51,10 +51,14 @@ class TaskManagerCommands:
             self.edit_folder_command,
             StateFilter(FSMTaskManager.select_folder_action), Text(startswith=['editfolder'])
         )
-        dispatcher.message.register(
-            self.show_task_command,
-            Command(commands=['task']), StateFilter(FSMTaskManager.request_task)
+        dispatcher.callback_query.register(
+            self.add_task_command,
+            StateFilter(FSMTaskManager.select_folder_action), Text(startswith=['addtask'])
         )
+        # dispatcher.message.register(
+        #     self.show_task_command,
+        #     Command(commands=['task']), StateFilter(FSMTaskManager.request_task)
+        # )
 
     @staticmethod
     async def proceed_exit_command(message: Message | CallbackQuery, state: FSMContext):
@@ -185,6 +189,12 @@ class TaskManagerCommands:
     async def edit_folder_command(callback: CallbackQuery, state: FSMContext):
         await callback.answer("Not implemented")
 
+    @staticmethod
+    async def add_task_command(callback: CallbackQuery, state: FSMContext):
+        await state.update_data(new_task={})
+        await callback.message.answer("Enter task's name")
+        await state.set_state(FSMTaskManager.new_task_request_name)
+
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
         prev_state = await state.get_state()
         match prev_state:
@@ -198,8 +208,7 @@ class TaskManagerCommands:
 
 
 class FSMTaskManager(StatesGroup):
-    request_folders = State()
     select_folders_action = State()
     select_folder_action = State()
-    request_tasks = State()
-    request_task = State()
+    new_task_request_name = State()
+
