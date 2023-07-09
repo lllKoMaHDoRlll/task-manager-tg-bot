@@ -14,3 +14,7 @@ class RepeatTimeFormattingFailed(Exception):
 
 class LoadFailed(Exception):
     """Error with loading data"""
+
+
+class FolderNotFound(Exception):
+    """Can't find folder"""
