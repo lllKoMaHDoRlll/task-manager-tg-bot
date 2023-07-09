@@ -34,11 +34,11 @@ class TaskManagerCommands:
         )
         dispatcher.callback_query.register(
             self.add_folder,
-            Text(text=['addfolder']), StateFilter(FSMTaskManager.select_folder_action)
+            Text(text=['addfolder']), StateFilter(FSMTaskManager.select_folders_action)
         )
         dispatcher.callback_query.register(
             self.show_folder_command,
-            StateFilter(FSMTaskManager.select_folder_action), Text(startswith=['folderid'])
+            StateFilter(FSMTaskManager.select_folders_action), Text(startswith=['folderid'])
         )
         dispatcher.message.register(
             self.show_task_command,
@@ -60,7 +60,7 @@ class TaskManagerCommands:
         folders = self.task_manager_handler.get_folders_by_user_id(message.from_user.id)[message.from_user.id]
         msg_text = self.get_text_show_folders(folders)
         keyboard = self.get_keyboard_show_folders(folders)
-        await state.set_state(FSMTaskManager.select_folder_action)
+        await state.set_state(FSMTaskManager.select_folders_action)
         main_message = await message.answer(msg_text, reply_markup=keyboard)
         await state.update_data(message=main_message, prev_state=default_state)
 
@@ -107,7 +107,7 @@ class TaskManagerCommands:
         keyboard = self.get_keyboard_show_folder(folders)
         await main_message.edit_text(msg_text)
         await main_message.edit_reply_markup(reply_markup=keyboard)
-        await state.set_state(FSMTaskManager.select_folder_action)
+        await state.set_state(FSMTaskManager.select_folders_action)
 
     async def show_folder_command(self, callback: CallbackQuery, state: FSMContext):
         folders = self.task_manager_handler.folders[str(callback.from_user.id)]
@@ -122,7 +122,7 @@ class TaskManagerCommands:
         msg_text = self.get_text_show_folder(tasks, callback)
         keyboard = self.get_keyboard_show_folder(tasks)
 
-        await state.set_state(FSMTaskManager.select_task_action)
+        await state.set_state(FSMTaskManager.select_folder_action)
         await callback.message.edit_text(msg_text, reply_markup=keyboard)
 
     def get_text_show_folder(self, tasks: dict[int:TaskCard], callback: CallbackQuery) -> str:
@@ -168,7 +168,7 @@ class TaskManagerCommands:
 
 class FSMTaskManager(StatesGroup):
     request_folders = State()
+    select_folders_action = State()
     select_folder_action = State()
-    select_task_action = State()
     request_tasks = State()
     request_task = State()
