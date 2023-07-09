@@ -1,3 +1,4 @@
+import datetime
 from asyncio import sleep
 
 from aiogram import Dispatcher
@@ -7,6 +8,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup, Message)
+from aiogram3_calendar.simple_calendar import SimpleCalendar, SimpleCalendarCallback, CallbackData
+
 
 from backend.task_manager.folder import Folder
 from backend.task_manager.task_card import TaskCard
@@ -58,6 +61,14 @@ class TaskManagerCommands:
         dispatcher.message.register(
             self.add_task_request_description_command,
             StateFilter(FSMTaskManager.new_task_request_name)
+        )
+        dispatcher.message.register(
+            self.add_task_request_due_date_command,
+            StateFilter(FSMTaskManager.new_task_request_description)
+        )
+        dispatcher.callback_query.register(
+            self.proceed_due_date,
+            StateFilter(FSMTaskManager.new_task_request_due_date), SimpleCalendarCallback.filter()
         )
         # dispatcher.message.register(
         #     self.show_task_command,
@@ -205,6 +216,25 @@ class TaskManagerCommands:
         await message.answer("Enter task's description ( '-' for empty)")
         await state.set_state(FSMTaskManager.new_task_request_description)
 
+    @staticmethod
+    async def add_task_request_due_date_command(message: Message, state: FSMContext):
+        if message.text != "-":
+            (await state.get_data())["new_task"].update({"description": message.text})
+        inline_calendar = SimpleCalendar()
+        await state.update_data(inline_calendar=inline_calendar)
+        await message.answer("Enter task's due date.", reply_markup=await inline_calendar.start_calendar())
+
+        await state.set_state(FSMTaskManager.new_task_request_due_date)
+
+    @staticmethod
+    async def proceed_due_date(callback: CallbackQuery, callback_data: dict, state: FSMContext):
+        inline_calendar: SimpleCalendar = (await state.get_data())["inline_calendar"]
+        selected, date = await inline_calendar.process_selection(callback, callback_data)
+        if selected:
+            (await state.get_data())["new_task"].update({"due_date": int(date.timestamp())})
+            await callback.message.answer("Enter repeat type.")
+            await state.set_state(FSMTaskManager.new_task_request_repeat)
+
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
         prev_state = await state.get_state()
         match prev_state:
@@ -222,4 +252,5 @@ class FSMTaskManager(StatesGroup):
     select_folder_action = State()
     new_task_request_name = State()
     new_task_request_description = State()
-
+    new_task_request_due_date = State()
+    new_task_request_repeat = State()
