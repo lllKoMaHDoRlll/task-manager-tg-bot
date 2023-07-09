@@ -17,13 +17,15 @@ class TaskManagerHandler:
             return {user_id: []}
 
     def add_folder(self, user_id: int) -> None:
-        folder_path = self.data_path.joinpath(str(user_id))
-        if not folder_path.exists():
+        folders_path = self.data_path.joinpath(str(user_id))
+        if not folders_path.exists():
             self.folders.update({str(user_id): []})
-            os.mkdir(folder_path)
-        folder_id = self.get_available_folder_id(folder_path)
+            os.mkdir(folders_path)
+        folder_id = self.get_available_folder_id(folders_path)
         folder = Folder(user_id, folder_id)
         self.folders[str(user_id)].append(folder)
+        folder_path = folders_path.joinpath(f"{folder_id}.json")
+        folder.save(folder_path)
 
     def load(self):
         if self.data_path.exists():
