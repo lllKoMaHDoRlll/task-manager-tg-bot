@@ -243,22 +243,28 @@ class TaskManagerCommands:
     @staticmethod
     async def add_task_request_name_command(callback: CallbackQuery, state: FSMContext):
         await state.update_data(new_task={})
-        await callback.message.answer(labels.REQUEST_TASK_NAME)
+        message = await callback.message.answer(labels.REQUEST_TASK_NAME)
+        await state.update_data(new_task_message=message)
         await state.set_state(FSMTaskManager.new_task_request_name)
 
     @staticmethod
     async def add_task_request_description_command(message: Message, state: FSMContext):
         (await state.get_data())["new_task"].update({"name": message.text})
-        await message.answer(labels.REQUEST_TASK_DESCRIPTION)
+        new_task_message: Message = (await state.get_data())["new_task_message"]
+        await new_task_message.edit_text(labels.REQUEST_TASK_DESCRIPTION)
         await state.set_state(FSMTaskManager.new_task_request_description)
 
     @staticmethod
     async def add_task_request_due_date_command(message: Message, state: FSMContext):
         if message.text != "-":
             (await state.get_data())["new_task"].update({"description": message.text})
+
+        new_task_message: Message = (await state.get_data())["new_task_message"]
+
         inline_calendar = SimpleCalendar()
         await state.update_data(inline_calendar=inline_calendar)
-        await message.answer(labels.REQUEST_TASK_DUE_DATE, reply_markup=await inline_calendar.start_calendar())
+        await new_task_message.edit_text(labels.REQUEST_TASK_DUE_DATE)
+        await new_task_message.edit_reply_markup(reply_markup=await inline_calendar.start_calendar())
 
         await state.set_state(FSMTaskManager.new_task_request_due_date)
 
@@ -268,7 +274,8 @@ class TaskManagerCommands:
         selected, date = await inline_calendar.process_selection(callback, callback_data)
         if selected:
             (await state.get_data())["new_task"].update({"due_date": int(date.timestamp())})
-            await callback.message.answer(labels.REQUEST_TASK_REPEAT)
+            new_task_message: Message = (await state.get_data())["new_task_message"]
+            await new_task_message.edit_text(labels.REQUEST_TASK_REPEAT)
             await state.set_state(FSMTaskManager.new_task_request_repeat)
 
     @staticmethod
@@ -283,7 +290,11 @@ class TaskManagerCommands:
             InlineKeyboardButton(text=labels.PRIORITY_BUTTON_3, callback_data="priority_3"),
             InlineKeyboardButton(text=labels.PRIORITY_BUTTON_4, callback_data="priority_4")
         ]]
-        await message.answer(text=msg_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
+
+        new_task_message: Message = (await state.get_data())["new_task_message"]
+
+        await new_task_message.edit_text(text=msg_text)
+        await new_task_message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
         await state.set_state(FSMTaskManager.new_task_request_priority)
 
     @staticmethod
@@ -309,7 +320,11 @@ class TaskManagerCommands:
                 callback_data="confirm_no"
             )
         ]]
-        await callback.message.answer(msg_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
+
+        new_task_message: Message = (await state.get_data())["new_task_message"]
+
+        await new_task_message.edit_text(text=msg_text)
+        await new_task_message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
         await state.set_state(FSMTaskManager.new_task_request_confirm)
 
     async def proceed_add_task(self, callback: CallbackQuery, state: FSMContext):
@@ -318,9 +333,15 @@ class TaskManagerCommands:
                 folder: Folder = (await state.get_data())["selected_folder"]
                 new_task_data: dict = (await state.get_data())["new_task"]
                 folder.add_task(**new_task_data)
+                await callback.answer(labels.ADD_TASK_COMPLETE)
             case "no":
-                pass
+                await callback.answer(labels.ADD_TASK_ABORT)
+
+        new_task_message: Message = (await state.get_data())["new_task_message"]
+        await new_task_message.delete()
+
         await state.update_data(new_task=None)
+        await state.update_data(new_task_message=None)
         await self.update_show_folder_command(callback, state)
 
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
