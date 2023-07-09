@@ -42,6 +42,9 @@ PRIORITY_BUTTON_4 = "4️⃣"
 TASK_REVIEW_TITLE = "😉 Here is your task:\n\n"
 TASK_CONFIRM = "Confirm ❓"
 
+ADD_TASK_COMPLETE = "✅ Task was added."
+ADD_TASK_ABORT = "❌ Task wasn't added."
+
 YES_BUTTON = "✅"
 NO_BUTTON = "❌"
 
