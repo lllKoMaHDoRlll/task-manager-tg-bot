@@ -27,6 +27,11 @@ class TaskManagerHandler:
         folder_path = folders_path.joinpath(f"{folder_id}.json")
         folder.save(folder_path)
 
+    def delete_folder(self, folder: Folder):
+        folders_path = self.data_path.joinpath(str(folder.user_id))
+        os.remove(folders_path)
+        self.folders.pop(folder.id)
+
     def load(self):
         if self.data_path.exists():
             try:
