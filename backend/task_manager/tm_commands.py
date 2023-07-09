@@ -278,10 +278,10 @@ class TaskManagerCommands:
 
         msg_text = labels.REQUEST_TASK_PRIORITY
         keyboard_markup = [[
-            InlineKeyboardButton(labels.PRIORITY_BUTTON_1, callback_data="priority_1"),
-            InlineKeyboardButton(labels.PRIORITY_BUTTON_2, callback_data="priority_2"),
-            InlineKeyboardButton(labels.PRIORITY_BUTTON_3, callback_data="priority_3"),
-            InlineKeyboardButton(labels.PRIORITY_BUTTON_4, callback_data="priority_4")
+            InlineKeyboardButton(text=labels.PRIORITY_BUTTON_1, callback_data="priority_1"),
+            InlineKeyboardButton(text=labels.PRIORITY_BUTTON_2, callback_data="priority_2"),
+            InlineKeyboardButton(text=labels.PRIORITY_BUTTON_3, callback_data="priority_3"),
+            InlineKeyboardButton(text=labels.PRIORITY_BUTTON_4, callback_data="priority_4")
         ]]
         await message.answer(text=msg_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
         await state.set_state(FSMTaskManager.new_task_request_priority)
@@ -295,8 +295,8 @@ class TaskManagerCommands:
             name=task_data["name"],
             priority=task_data["priority"],
             due_date=task_data["due_date"],
-            repeat=task_data["repeat"],
-            description=task_data["description"]
+            repeat=task_data["repeat"] if "repeat" in task_data.keys() else "-",
+            description=task_data["description"] if "description" in task_data.keys() else "-"
         )
         msg_text += labels.TASK_CONFIRM
         keyboard_markup = [[
