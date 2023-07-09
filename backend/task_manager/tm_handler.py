@@ -55,7 +55,7 @@ class TaskManagerHandler:
 
     @staticmethod
     def get_available_folder_id(path: Path):
-        files = [int(file[:5]) for file in os.listdir(path)]
+        files = [int(file[:-5]) for file in os.listdir(path)]
 
         prob_id = 0
         for _ in range(len(files)):
