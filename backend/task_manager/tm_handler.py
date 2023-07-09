@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
+from typing import NoReturn
 
-from backend.exceptions import LoadFailed
+from backend.exceptions import LoadFailed, FolderNotFound
 from backend.task_manager.folder import Folder
 
 
@@ -68,3 +69,9 @@ class TaskManagerHandler:
                 return int(prob_id)
             prob_id += 1
         return int(prob_id) + 1
+
+    def get_folder_by_folder_id(self, user_id: int, folder_id: int) -> Folder | NoReturn:
+        for folder in self.get_folders_by_user_id(user_id)[user_id]:
+            if folder.id == folder_id:
+                return folder
+        raise FolderNotFound
