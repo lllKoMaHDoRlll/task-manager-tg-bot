@@ -31,7 +31,7 @@ class Folder:
     def get_tasks_amount(self) -> int:
         return self.active_tasks.__len__()
 
-    def get_available_task_id(self):
+    def get_available_task_id(self) -> int:
         tasks_ids = [task.id for task in self.active_tasks.values()]
         for index in range(len(tasks_ids)):
             if index not in tasks_ids:
