@@ -10,6 +10,28 @@ class TaskManagerHandler:
         self.folders = dict()
         self.data_path = data_path
 
+    def get_folders_by_user_id(self, user_id: int) -> dict:
+        if str(user_id) in self.folders.keys():
+            return {user_id: self.folders[str(user_id)]}
+        else:
+            return {user_id: []}
+
+    def add_folder(self, user_id: int) -> None:
+        folders_path = self.data_path.joinpath(str(user_id))
+        if not folders_path.exists():
+            self.folders.update({str(user_id): []})
+            os.mkdir(folders_path)
+        folder_id = self.get_available_folder_id(folders_path)
+        folder = Folder(user_id, folder_id)
+        self.folders[str(user_id)].append(folder)
+        folder_path = folders_path.joinpath(f"{folder_id}.json")
+        folder.save(folder_path)
+
+    def delete_folder(self, folder: Folder):
+        folders_path = self.data_path.joinpath(str(folder.user_id)).joinpath(f"{str(folder.id)}.json")
+        os.remove(folders_path)
+        self.folders[str(folder.user_id)].remove(folder)
+
     def load(self):
         if self.data_path.exists():
             try:
@@ -38,7 +60,7 @@ class TaskManagerHandler:
 
     @staticmethod
     def get_available_folder_id(path: Path):
-        files = [int(file[:5]) for file in os.listdir(path)]
+        files = [int(file[:-5]) for file in os.listdir(path)]
 
         prob_id = 0
         for _ in range(len(files)):
