@@ -1,4 +1,3 @@
-import datetime
 from asyncio import sleep
 
 from aiogram import Dispatcher
@@ -8,8 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup, Message)
-from aiogram3_calendar.simple_calendar import SimpleCalendar, SimpleCalendarCallback, CallbackData
-
+from aiogram3_calendar.simple_calendar import SimpleCalendar, SimpleCalendarCallback
 
 from backend.task_manager.folder import Folder
 from backend.task_manager.task_card import TaskCard
@@ -232,8 +230,23 @@ class TaskManagerCommands:
         selected, date = await inline_calendar.process_selection(callback, callback_data)
         if selected:
             (await state.get_data())["new_task"].update({"due_date": int(date.timestamp())})
-            await callback.message.answer("Enter repeat type.")
+            await callback.message.answer("Enter repeat type ('-' for no repeat).")
             await state.set_state(FSMTaskManager.new_task_request_repeat)
+
+    @staticmethod
+    async def add_task_request_priority_command(message: Message, state: FSMContext):
+        if message.text != '-':
+            (await state.get_data()).update({"repeat": message.text})
+
+        msg_text = "Select priority"
+        keyboard_markup = [[
+            InlineKeyboardButton(text="1", callback_data="priority_1"),
+            InlineKeyboardButton(text="2", callback_data="priority_2"),
+            InlineKeyboardButton(text="3", callback_data="priority_3"),
+            InlineKeyboardButton(text="4", callback_data="priority_4")
+        ]]
+        await message.answer(text=msg_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
+        await state.set_state(FSMTaskManager.new_task_request_priority)
 
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
         prev_state = await state.get_state()
@@ -254,3 +267,4 @@ class FSMTaskManager(StatesGroup):
     new_task_request_description = State()
     new_task_request_due_date = State()
     new_task_request_repeat = State()
+    new_task_request_priority = State()
