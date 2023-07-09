@@ -28,6 +28,9 @@ class Folder:
     def save(self, path: Path) -> None:
         json.dump({task.id: task.get_attrs() for task in self.active_tasks}, path.open("w"), indent=4)
 
+    def get_tasks_amount(self) -> int:
+        return self.active_tasks.__len__()
+
     def get_available_task_id(self):
         tasks_ids = [task.id for task in self.active_tasks.values()]
         for index in range(len(tasks_ids)):
