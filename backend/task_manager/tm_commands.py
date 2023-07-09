@@ -52,7 +52,7 @@ class TaskManagerCommands:
             StateFilter(FSMTaskManager.select_folder_action), Text(startswith=['editfolder'])
         )
         dispatcher.callback_query.register(
-            self.add_task_command,
+            self.add_task_request_name_command,
             StateFilter(FSMTaskManager.select_folder_action), Text(startswith=['addtask'])
         )
         # dispatcher.message.register(
@@ -190,7 +190,7 @@ class TaskManagerCommands:
         await callback.answer("Not implemented")
 
     @staticmethod
-    async def add_task_command(callback: CallbackQuery, state: FSMContext):
+    async def add_task_request_name_command(callback: CallbackQuery, state: FSMContext):
         await state.update_data(new_task={})
         await callback.message.answer("Enter task's name")
         await state.set_state(FSMTaskManager.new_task_request_name)
