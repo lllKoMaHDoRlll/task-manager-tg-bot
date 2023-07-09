@@ -47,6 +47,10 @@ class TaskManagerCommands:
             self.show_folder_command,
             StateFilter(FSMTaskManager.select_folders_action), Text(startswith=['folderid'])
         )
+        dispatcher.callback_query.register(
+            self.edit_folder_command,
+            StateFilter(FSMTaskManager.select_folder_action), Text(startswith=['editfolder'])
+        )
         dispatcher.message.register(
             self.show_task_command,
             Command(commands=['task']), StateFilter(FSMTaskManager.request_task)
@@ -176,6 +180,10 @@ class TaskManagerCommands:
         folder: Folder = (await state.get_data())["selected_folder"]
         self.task_manager_handler.delete_folder(folder)
         await self.update_show_folders_command(callback, state)
+
+    @staticmethod
+    async def edit_folder_command(callback: CallbackQuery, state: FSMContext):
+        await callback.answer("Not implemented")
 
     async def back_command(self, callback: CallbackQuery, state: FSMContext):
         prev_state = await state.get_state()
