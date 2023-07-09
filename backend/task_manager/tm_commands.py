@@ -11,6 +11,7 @@ from asyncio import sleep
 
 from backend.task_manager.tm_handler import TaskManagerHandler
 from backend.task_manager.folder import Folder
+from backend.task_manager.task_card import TaskCard
 
 
 class TaskManagerCommands:
@@ -57,7 +58,7 @@ class TaskManagerCommands:
     async def show_folders_command(self, message: Message, state: FSMContext):
         folders = self.task_manager_handler.get_folders_by_user_id(message.from_user.id)[message.from_user.id]
         msg_text = self.get_text_show_folders(folders)
-        keyboard = self.get_keyboard_show_folder(folders)
+        keyboard = self.get_keyboard_show_folders(folders)
         await state.set_state(FSMTaskManager.select_folder_action)
         main_message = await message.answer(msg_text, reply_markup=keyboard)
         await state.update_data(message=main_message, prev_state=default_state)
@@ -73,7 +74,7 @@ class TaskManagerCommands:
 
         return msg_text
 
-    def get_keyboard_show_folder(self, folders: list[Folder]) -> InlineKeyboardMarkup:
+    def get_keyboard_show_folders(self, folders: list[Folder]) -> InlineKeyboardMarkup:
         add_task_button = InlineKeyboardButton(text="Add folder", callback_data="addfolder")
         keyboard_markup = [[add_task_button], []]
 
@@ -96,7 +97,6 @@ class TaskManagerCommands:
 
         return keyboard
 
-
     async def add_folder(self, callback: CallbackQuery, state: FSMContext):
         main_message: Message = (await state.get_data())["message"]
         self.task_manager_handler.add_folder(callback.from_user.id)
@@ -109,7 +109,6 @@ class TaskManagerCommands:
         await state.set_state(FSMTaskManager.select_folder_action)
 
     async def show_folder_command(self, callback: CallbackQuery, state: FSMContext):
-        msg_text = f"Folder: {callback.data.split('_')[1]}"
         await state.update_data(folder_id=int(callback.data.split('_')[1]))
         folders = self.task_manager_handler.folders[str(callback.from_user.id)]
         tasks = {}
@@ -117,26 +116,46 @@ class TaskManagerCommands:
             if folder.id == int(callback.data.split('_')[1]):
                 selected_folder = folder
                 tasks = selected_folder.active_tasks
-        keyboard_markup = [[]]
-        if tasks:
-            msg_text = f'Your tasks in folder {(await state.get_data())["folder_id"]}:\n\n'
 
-            row_index = 0
+        msg_text = self.get_text_show_folder(tasks, callback)
+        keyboard = self.get_keyboard_show_folder(tasks)
+
+        await state.set_state(FSMTaskManager.select_task_action)
+        await callback.message.edit_text(msg_text, reply_markup=keyboard)
+
+    def get_text_show_folder(self, tasks: dict[int:TaskCard], callback: CallbackQuery) -> str:
+        msg_text = f"Folder: {callback.data.split('_')[1]}\n\n"
+        if tasks:
+
+            row_index = 1
             for task in tasks.values():
                 msg_text += f"{row_index}: {task.get_attrs()}\n"
+                row_index += 1
+
+        else:
+            msg_text += "You have no tasks."
+
+        return msg_text
+
+    def get_keyboard_show_folder(self, tasks: dict[int:TaskCard]) -> InlineKeyboardMarkup:
+        add_task_button = InlineKeyboardButton(text="Add task", callback_data="addtask")
+        edit_folder_button = InlineKeyboardButton(text= "Edit folder", callback_data="editfolder")
+        delete_folder_button = InlineKeyboardButton(text= "Delete folder", callback_data="editfolder")
+        keyboard_markup = [[add_task_button], [edit_folder_button, delete_folder_button]]
+        row_index = 2
+        if tasks:
+
+            for task in tasks.values():
                 button = InlineKeyboardButton(text=f"Name: {task.name}", callback_data=f"taskname_{task.name}")
                 keyboard_markup[row_index].append(button)
                 row_index += 1
                 keyboard_markup.append([])
 
-            button = InlineKeyboardButton(text="cancel", callback_data="cancel")
-            keyboard_markup[row_index].append(button)
-            keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
-            await state.set_state(FSMTaskManager.select_task)
-            await callback.message.edit_text(msg_text, reply_markup=keyboard)
-        else:
-            await state.set_state(FSMTaskManager.request_task)
-            await callback.message.answer("You have no tasks in folder yet.")
+        button = InlineKeyboardButton(text="back", callback_data="back")
+        keyboard_markup[row_index].append(button)
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
+        return keyboard
+
 
     async def show_task_command(self, message: Message, state: FSMContext):
         await message.answer("show task")
@@ -146,6 +165,6 @@ class TaskManagerCommands:
 class FSMTaskManager(StatesGroup):
     request_folders = State()
     select_folder_action = State()
-    select_task = State()
+    select_task_action = State()
     request_tasks = State()
     request_task = State()
