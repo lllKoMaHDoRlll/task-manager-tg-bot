@@ -81,6 +81,10 @@ class TaskManagerCommands:
             self.proceed_add_task,
             StateFilter(FSMTaskManager.new_task_request_confirm), Text(startswith="confirm")
         )
+        dispatcher.callback_query.register(
+            self.show_task_command,
+            StateFilter(FSMTaskManager.select_folder_action), Text(startswith="taskid")
+        )
 
     @staticmethod
     async def proceed_exit_command(message: Message | CallbackQuery, state: FSMContext):
@@ -184,7 +188,7 @@ class TaskManagerCommands:
         msg_text = labels.SHOW_FOLDER_TITLE.format(folder_id=folder_id)
 
         if tasks:
-            msg_text += "".join([labels.SHOW_FOLDER_TASK_FRAME.format(
+            msg_text += "".join([labels.TASK_FRAME.format(
                     name=task.name,
                     priority=task.priority,
                     due_date=task.due_date,
@@ -299,7 +303,7 @@ class TaskManagerCommands:
         task_data = (await state.get_data())["new_task"]
 
         msg_text = labels.TASK_REVIEW_TITLE
-        msg_text += labels.SHOW_FOLDER_TASK_FRAME.format(
+        msg_text += labels.TASK_FRAME.format(
             name=task_data["name"],
             priority=task_data["priority"],
             due_date=task_data["due_date"],
@@ -348,14 +352,69 @@ class TaskManagerCommands:
             case FSMTaskManager.select_folder_action:
                 await self.update_show_folders_command(callback, state)
 
+    async def show_task_command(self, callback: CallbackQuery, state: FSMContext):
+        task_id = int(callback.data.split("_")[1])
+        selected_folder: Folder = (await state.get_data())["selected_folder"]
+        selected_task = selected_folder.get_task_by_id(task_id)
+        main_message: Message = (await state.get_data())["message"]
+
+        await state.update_data(selected_task=selected_task)
+
+        msg_text = self.get_text_show_task(selected_task)
+        keyboard = self.get_keyboard_show_task()
+        await main_message.edit_text(text=msg_text)
+        await main_message.edit_reply_markup(reply_markup=keyboard)
+
+        await state.set_state(FSMTaskManager.select_task_action)
+
+
     @staticmethod
-    async def show_task_command(message: Message, state: FSMContext):
-        await message.answer(labels.NOT_IMPLEMENTED_ALERT)
+    def get_text_show_task(task: TaskCard):
+        msg_text = labels.TASK_FRAME.format(
+            name=task.name,
+            description=task.description,
+            due_date=task.due_date,
+            repeat=task.repeat,
+            priority=task.priority
+        )
+        return msg_text
+
+    @staticmethod
+    def get_keyboard_show_task() -> InlineKeyboardMarkup:
+        complete_button = InlineKeyboardButton(text=labels.COMPLETE_TASK_BUTTON,
+                                               callback_data="completetask")
+
+        edit_name_button = InlineKeyboardButton(text=labels.EDIT_TASK_NAME_BUTTON,
+                                                callback_data="edittask_name")
+        edit_description_button = InlineKeyboardButton(text=labels.EDIT_TASK_DESCRIPTION_BUTTON,
+                                                       callback_data="edittask_description")
+        edit_due_date_button = InlineKeyboardButton(text=labels.EDIT_TASK_DUE_DATE_BUTTON,
+                                                    callback_data="edittask_duedate")
+        edit_repeat_button = InlineKeyboardButton(text=labels.EDIT_TASK_REPEAT_BUTTON,
+                                                  callback_data="edittask_repeat")
+        edit_priority_button = InlineKeyboardButton(text=labels.EDIT_TASK_PRIORITY_BUTTON,
+                                                    callback_data="edittask_priority")
+
+        delete_button = InlineKeyboardButton(text=labels.DELETE_TASK_BUTTON,
+                                             callback_data="deletetask")
+
+        back_button = InlineKeyboardButton(text=labels.BACK_BUTTON, callback_data="back")
+        exit_button = InlineKeyboardButton(text=labels.EXIT_BUTTON, callback_data="exit")
+        keyboard_markup = [
+            [complete_button],
+            [edit_name_button, edit_description_button],
+            [edit_due_date_button, edit_repeat_button, edit_priority_button],
+            [delete_button],
+            [back_button, exit_button]
+        ]
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
+        return keyboard
 
 
 class FSMTaskManager(StatesGroup):
     select_folders_action = State()
     select_folder_action = State()
+    select_task_action = State()
     new_task_request_name = State()
     new_task_request_description = State()
     new_task_request_due_date = State()
