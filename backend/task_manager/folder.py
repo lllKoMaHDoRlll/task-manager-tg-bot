@@ -20,10 +20,10 @@ class Folder:
 
                 for task_id in data:
                     self.add_task(**(data[task_id]))
-            except:
-                raise LoadFailed
+            except Exception:
+                raise LoadFailed("Error while loading tasks")
         else:
-            raise LoadFailed
+            raise LoadFailed("Tasks' data file not exists")
 
     def save(self, path: Path) -> None:
         json.dump({task.id: task.get_attrs() for task in self.active_tasks}, path.open("w"), indent=4)

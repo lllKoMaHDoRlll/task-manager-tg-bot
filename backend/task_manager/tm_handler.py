@@ -47,10 +47,10 @@ class TaskManagerHandler:
 
                     self.folders.update({user_id: folders})
 
-            except:
-                raise LoadFailed
+            except Exception:
+                raise LoadFailed("Error while loading folders")
         else:
-            raise LoadFailed
+            raise LoadFailed("Folders' data file not exists")
 
     def save(self):
         for user_id in self.folders:

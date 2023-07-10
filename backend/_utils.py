@@ -14,10 +14,10 @@ def get_config(config_path: Path = Path("./data/config.json")) -> ConfigData:
                 config_data = json.load(file)
             config_data = ConfigData(**config_data)
             return config_data
-        except:
-            raise ConfigLoadFailed
+        except Exception:
+            raise ConfigLoadFailed("Error while loading config")
     else:
-        raise ConfigLoadFailed
+        raise ConfigLoadFailed("Config data file not exists")
 
 
 async def make_request_get(url: str, params: dict | None = None) -> str | NoReturn:
@@ -25,7 +25,7 @@ async def make_request_get(url: str, params: dict | None = None) -> str | NoRetu
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params) as resp:
                 return await resp.json()
-    except:
+    except Exception:
         raise MakingRequestFailed
 
 
@@ -33,7 +33,7 @@ def format_repeat_time(repeat_text: str) -> int | NoReturn:
     try:
         repeat_text = repeat_text.split()
         if repeat_text[0] != 'every':
-            raise RepeatTimeFormattingFailed
+            raise RepeatTimeFormattingFailed("First word must be every")
         if repeat_text[1] == 'day':
             delta = 86400
         elif repeat_text[1] in WEEKDAYS:
@@ -41,8 +41,8 @@ def format_repeat_time(repeat_text: str) -> int | NoReturn:
         elif repeat_text[1].isdecimal() and repeat_text[2] == 'days':
             delta = 86400 * int(repeat_text[1])
         else:
-            raise RepeatTimeFormattingFailed
+            raise RepeatTimeFormattingFailed("Invalid repeat text format")
 
         return delta
-    except:
-        raise RepeatTimeFormattingFailed
+    except Exception:
+        raise RepeatTimeFormattingFailed("Error with formatting repeat text")
