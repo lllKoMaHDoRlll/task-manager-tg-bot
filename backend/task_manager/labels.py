@@ -16,7 +16,7 @@ NOT_IMPLEMENTED_ALERT = "🚧 Work in progress."
 CREATE_FOLDER_ALERT = "✅ New folder was created."
 
 SHOW_FOLDER_TITLE = "📁 №{folder_id}:\n\n"
-SHOW_FOLDER_TASK_FRAME = "📕 {name} ❗️: {priority} \n⏰: {due_date} 🔁: {repeat}\n📎: {description}\n\n"
+TASK_FRAME = "📕 {name} ❗️: {priority} \n⏰: {due_date} 🔁: {repeat}\n📎: {description}\n\n"
 
 SHOW_FOLDER_NO_TASKS = "🤔 There's nothing! Try add some new tasks!"
 
