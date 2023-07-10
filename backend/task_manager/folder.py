@@ -38,6 +38,11 @@ class Folder:
                 return index
         return len(tasks_ids)
 
+    def get_task_by_id(self, id_: int) -> TaskCard:
+        for task in self.active_tasks.values():
+            if task.id == id_:
+                return task
+
     def add_task(self, name: str, description: str = "", due_date=None, repeat=None,
                  priority: int = 4, **kwargs) -> TaskCard:
         task = TaskCard(self.get_available_task_id(), name, self, description, due_date, repeat, PriorityLevel(int(priority)))
