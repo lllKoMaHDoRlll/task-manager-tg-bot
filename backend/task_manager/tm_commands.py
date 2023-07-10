@@ -43,7 +43,7 @@ class TaskManagerCommands:
         )
         dispatcher.callback_query.register(
             self.back_command,
-            Text(text=['back']), StateFilter(FSMTaskManager.select_folder_action)
+            Text(text=['back']), ~StateFilter(default_state)
         )
         dispatcher.callback_query.register(
             self.show_folder_command,
@@ -351,6 +351,8 @@ class TaskManagerCommands:
         match prev_state:
             case FSMTaskManager.select_folder_action:
                 await self.update_show_folders_command(callback, state)
+            case FSMTaskManager.select_task_action:
+                await self.update_show_folder_command(callback, state)
 
     async def show_task_command(self, callback: CallbackQuery, state: FSMContext):
         task_id = int(callback.data.split("_")[1])
