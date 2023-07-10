@@ -211,7 +211,7 @@ class TaskManagerCommands:
             keyboard_markup += [
                 [InlineKeyboardButton(
                     text=labels.TASK_THUMBNAIL.format(name=task.name),
-                    callback_data=f"taskname_{task.name}"
+                    callback_data=f"taskid_{task.id}"
                 )] for task in tasks.values()
             ]
 
