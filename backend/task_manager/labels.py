@@ -28,6 +28,16 @@ DELETE_FOLDER_ALERT = "❌ Folder № {folder_id} was deleted."
 
 TASK_THUMBNAIL = "📕 {name}"
 
+COMPLETE_TASK_BUTTON = ""
+DELETE_TASK_BUTTON = ""
+
+EDIT_TASK_NAME_BUTTON = ""
+EDIT_TASK_DESCRIPTION_BUTTON = ""
+EDIT_TASK_DUE_DATE_BUTTON = ""
+EDIT_TASK_REPEAT_BUTTON = ""
+EDIT_TASK_PRIORITY_BUTTON = ""
+
+
 REQUEST_TASK_NAME = "✍️ Enter task's name.🔴"
 REQUEST_TASK_DESCRIPTION = "✍️ Enter task's description.🟢 ('-' for default)"
 REQUEST_TASK_DUE_DATE = "✍️ Select task's due date.🔴"
