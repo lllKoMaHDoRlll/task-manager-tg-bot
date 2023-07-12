@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from datetime import datetime
 
 from backend.data_classes import PriorityLevel
 from backend.task_manager.task_card import TaskCard
@@ -43,7 +44,7 @@ class Folder:
             if task.id == id_:
                 return task
 
-    def add_task(self, name: str, description: str = "", due_date=None, repeat=None,
+    def add_task(self, name: str, description: str = "", due_date: datetime | None = None, repeat=None,
                  priority: int = 4, **kwargs) -> TaskCard:
         task = TaskCard(self.get_available_task_id(), name, self, description, due_date, repeat, PriorityLevel(int(priority)))
         self.active_tasks.update({task.id: task})

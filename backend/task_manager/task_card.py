@@ -1,10 +1,12 @@
+from datetime import datetime
+
 from typing import NoReturn
 
 from backend.data_classes import PriorityLevel
 
 
 class TaskCard:
-    def __init__(self, id_: int, name: str, parent, description: str = "", due_date=None, repeat=None,
+    def __init__(self, id_: int, name: str, parent, description: str = "", due_date: datetime | None = None, repeat=None,
                  priority: PriorityLevel = PriorityLevel.NO):
         self.id = id_
         self.name = name
@@ -38,7 +40,7 @@ class TaskCard:
         self.description = new_description
         return self.description
 
-    def edit_due_date(self, new_due_date):
+    def edit_due_date(self, new_due_date: datetime) -> datetime:
         self.due_date = new_due_date
         return self.due_date
 

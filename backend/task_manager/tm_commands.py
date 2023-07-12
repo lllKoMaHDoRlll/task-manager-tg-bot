@@ -272,7 +272,7 @@ class TaskManagerCommands:
         selected, date = await SimpleCalendar().process_selection(callback, callback_data)
 
         if selected:
-            (await state.get_data())["new_task"].update({"due_date": int(date.timestamp())})
+            (await state.get_data())["new_task"].update({"due_date": date})
             new_task_message: Message = (await state.get_data())["new_task_message"]
 
             await new_task_message.edit_text(labels.REQUEST_TASK_REPEAT)
