@@ -1,4 +1,5 @@
 from asyncio import sleep
+from datetime import datetime
 
 from aiogram import Dispatcher
 from aiogram.filters import Command, StateFilter, Text
@@ -8,6 +9,7 @@ from aiogram.fsm.state import default_state
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup, Message)
 from aiogram3_calendar.simple_calendar import SimpleCalendar, SimpleCalendarCallback
+from aiogram_timepicker.aiogram3_timepicker.full_time_picker import FullTimePicker, FullTimePickerCallback
 
 from backend.task_manager.folder import Folder
 from backend.task_manager.task_card import TaskCard
@@ -66,8 +68,12 @@ class TaskManagerCommands:
             StateFilter(FSMTaskManager.new_task_request_description)
         )
         dispatcher.callback_query.register(
-            self.add_task_request_repeat_command,
+            self.add_task_request_time_command,
             StateFilter(FSMTaskManager.new_task_request_due_date), SimpleCalendarCallback.filter()
+        )
+        dispatcher.callback_query.register(
+            self.add_task_request_repeat_command,
+            StateFilter(FSMTaskManager.new_task_request_time), FullTimePickerCallback.filter()
         )
         dispatcher.message.register(
             self.add_task_request_priority_command,
@@ -268,11 +274,29 @@ class TaskManagerCommands:
         await state.set_state(FSMTaskManager.new_task_request_due_date)
 
     @staticmethod
-    async def add_task_request_repeat_command(callback: CallbackQuery, callback_data: dict, state: FSMContext):
+    async def add_task_request_time_command(callback: CallbackQuery, callback_data: dict, state: FSMContext):
         selected, date = await SimpleCalendar().process_selection(callback, callback_data)
 
         if selected:
             (await state.get_data())["new_task"].update({"due_date": date})
+            new_task_message: Message = (await state.get_data())["new_task_message"]
+
+            keyboard = await FullTimePicker().start_picker()
+
+            await new_task_message.edit_text(labels.REQUEST_TASK_TIME)
+            await new_task_message.edit_reply_markup(reply_markup=keyboard)
+
+            await state.set_state(FSMTaskManager.new_task_request_time)
+
+    @staticmethod
+    async def add_task_request_repeat_command(callback: CallbackQuery, callback_data: dict, state: FSMContext):
+        selected, time = await FullTimePicker().process_selection(callback, callback_data)
+
+        if selected:
+            date: datetime = (await state.get_data())["new_task"]["due_date"]
+            task_datetime = datetime(date.year, date.month, date.day, time.hour, time.minute)
+
+            (await state.get_data())["new_task"].update({"due_date": task_datetime})
             new_task_message: Message = (await state.get_data())["new_task_message"]
 
             await new_task_message.edit_text(labels.REQUEST_TASK_REPEAT)
@@ -420,6 +444,7 @@ class FSMTaskManager(StatesGroup):
     new_task_request_name = State()
     new_task_request_description = State()
     new_task_request_due_date = State()
+    new_task_request_time = State()
     new_task_request_repeat = State()
     new_task_request_priority = State()
     new_task_request_confirm = State()

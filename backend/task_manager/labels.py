@@ -41,6 +41,7 @@ EDIT_TASK_PRIORITY_BUTTON = "❗️ Edit priority"
 REQUEST_TASK_NAME = "✍️ Enter task's name.🔴"
 REQUEST_TASK_DESCRIPTION = "✍️ Enter task's description.🟢 ('-' for default)"
 REQUEST_TASK_DUE_DATE = "✍️ Select task's due date.🔴"
+REQUEST_TASK_TIME = "Select task's due time" # TODO
 REQUEST_TASK_REPEAT = "✍️ Enter task's repeat time.🟢 ('-' for no repeat)"
 REQUEST_TASK_PRIORITY = "✍️ Select task's priority.🔴"
 
