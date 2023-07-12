@@ -5,11 +5,14 @@ from typing import NoReturn
 from backend.exceptions import LoadFailed, FolderNotFound
 from backend.task_manager.folder import Folder
 
+from backend.task_manager.scheduler import TaskScheduler
+
 
 class TaskManagerHandler:
-    def __init__(self, data_path: Path):
+    def __init__(self, data_path: Path, task_scheduler: TaskScheduler):
         self.folders = dict()
         self.data_path = data_path
+        self.task_scheduler = task_scheduler
 
     def get_folders_by_user_id(self, user_id: int) -> dict:
         if str(user_id) in self.folders.keys():
@@ -75,3 +78,6 @@ class TaskManagerHandler:
             if folder.id == folder_id:
                 return folder
         raise FolderNotFound
+
+    async def add_task(self, task, chat_id):
+        await self.task_scheduler.add_task(task, chat_id)
