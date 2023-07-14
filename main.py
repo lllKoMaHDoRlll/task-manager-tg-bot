@@ -7,7 +7,7 @@ from aiogram.types import Message
 
 from backend._utils import get_config
 from backend.task_manager.scheduler import TaskScheduler
-from backend.task_manager.tm_commands import TaskManagerCommands
+from backend.task_manager.tm_dialogs.main_menu import TaskManagerMainMenu
 from backend.task_manager.tm_handler import TaskManagerHandler
 
 
@@ -22,7 +22,7 @@ class MyBot:
 
         self.task_manager_handler = TaskManagerHandler(self.tasks_data_path, self.task_scheduler)
         self.task_manager_handler.load()
-        self.task_manager_commands = TaskManagerCommands(self.task_manager_handler)
+        self.task_manager_commands = TaskManagerMainMenu(self.task_manager_handler)
         self.storage = MemoryStorage()
 
         self.dispatcher = Dispatcher(storage=self.storage)
