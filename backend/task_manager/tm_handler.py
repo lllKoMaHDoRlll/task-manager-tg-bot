@@ -22,14 +22,17 @@ class TaskManagerHandler:
 
     def add_folder(self, user_id: int) -> None:
         folders_path = self.data_path.joinpath(str(user_id))
+
         if not folders_path.exists():
             self.folders.update({str(user_id): []})
             os.mkdir(folders_path)
-        folder_id = self.get_available_folder_id(folders_path)
-        folder = Folder(user_id, folder_id)
+
+        folder_id = self._get_available_folder_id(folders_path)
+        folder = Folder(user_id, folder_id, self.data_path.joinpath(r"\{}".format(user_id)))
+
         self.folders[str(user_id)].append(folder)
-        folder_path = folders_path.joinpath(f"{folder_id}.json")
-        folder.save(folder_path)
+
+        folder.save()
 
     def delete_folder(self, folder: Folder):
         folders_path = self.data_path.joinpath(str(folder.user_id)).joinpath(f"{str(folder.id)}.json")
@@ -44,7 +47,11 @@ class TaskManagerHandler:
                     folders = []
                     for folder_id in os.listdir(path_to_user):
                         path_to_folder = path_to_user.joinpath(folder_id)
-                        folder = Folder(int(user_id), int(folder_id[:-5]))
+                        folder = Folder(
+                            int(user_id),
+                            int(folder_id[:-5]),
+                            path_to_folder
+                        )
                         folder.load(path_to_folder)
                         folders.append(folder)
 
@@ -55,11 +62,6 @@ class TaskManagerHandler:
         else:
             raise LoadFailed("Folders' data file not exists")
 
-    async def schedule_folders(self):
-        for user_id in self.folders:
-            for folder in self.folders[user_id]:
-                await self.task_scheduler.add_tasks(folder.active_tasks, user_id)
-
     def save(self):
         for user_id in self.folders:
             path_to_user = self.data_path.joinpath(user_id)
@@ -68,7 +70,7 @@ class TaskManagerHandler:
                 folder.save(path_to_folder)
 
     @staticmethod
-    def get_available_folder_id(path: Path):
+    def _get_available_folder_id(path: Path):
         files = [int(file[:-5]) for file in os.listdir(path)]
 
         prob_id = 0
@@ -85,4 +87,4 @@ class TaskManagerHandler:
         raise FolderNotFound
 
     async def schedule_task(self, task, chat_id):
-        await self.task_scheduler.add_task(task, chat_id)
+        await self.task_scheduler.schedule_task(task, chat_id)

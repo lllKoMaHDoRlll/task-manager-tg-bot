@@ -36,7 +36,7 @@ class MyBot:
         self.task_manager_commands.register(self.dispatcher)
 
     async def on_startup(self):
-        await self.task_manager_handler.schedule_folders()
+        await self.task_scheduler.schedule_folders(self.task_manager_handler.folders)
         await self.task_scheduler.run()
 
 
