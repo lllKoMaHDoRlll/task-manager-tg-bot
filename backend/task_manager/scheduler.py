@@ -16,6 +16,10 @@ class TaskScheduler:
     async def run(self):
         self.scheduler.start()
 
+    async def add_tasks(self, tasks: dict[int:TaskCard], chat_id: int):
+        for task in tasks.values():
+            await self.add_task(task, chat_id)
+
     async def add_task(self, task: TaskCard, chat_id: int):
         due_date = datetime(
             year=task.due_date.year,
