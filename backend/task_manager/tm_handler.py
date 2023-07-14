@@ -28,7 +28,7 @@ class TaskManagerHandler:
             os.mkdir(folders_path)
 
         folder_id = self._get_available_folder_id(folders_path)
-        folder = Folder(user_id, folder_id, self.data_path.joinpath(r"\{}".format(user_id)))
+        folder = Folder(user_id, folder_id, self.data_path.joinpath(str(user_id)).joinpath("{}.json".format(folder_id)))
 
         self.folders[str(user_id)].append(folder)
 
