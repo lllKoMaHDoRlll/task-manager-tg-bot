@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from typing import NoReturn
 
 from backend.data_classes import PriorityLevel
