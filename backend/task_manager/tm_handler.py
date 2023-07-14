@@ -50,10 +50,15 @@ class TaskManagerHandler:
 
                     self.folders.update({user_id: folders})
 
-            except Exception:
+            except Exception as ex:
                 raise LoadFailed("Error while loading folders")
         else:
             raise LoadFailed("Folders' data file not exists")
+
+    async def schedule_folders(self):
+        for user_id in self.folders:
+            for folder in self.folders[user_id]:
+                await self.task_scheduler.add_tasks(folder.active_tasks, user_id)
 
     def save(self):
         for user_id in self.folders:
@@ -79,5 +84,5 @@ class TaskManagerHandler:
                 return folder
         raise FolderNotFound
 
-    async def add_task(self, task, chat_id):
+    async def schedule_task(self, task, chat_id):
         await self.task_scheduler.add_task(task, chat_id)

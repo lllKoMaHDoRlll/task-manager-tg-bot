@@ -358,7 +358,8 @@ class TaskManagerCommands:
             case "yes":
                 folder: Folder = (await state.get_data())["selected_folder"]
                 new_task_data: dict = (await state.get_data())["new_task"]
-                folder.add_task(**new_task_data)
+                task = folder.add_new_task(**new_task_data)
+                await self.task_manager_handler.task_scheduler.add_task(task, callback.from_user.id)
                 await callback.answer(labels.ADD_TASK_COMPLETE)
             case "no":
                 await callback.answer(labels.ADD_TASK_ABORT)

@@ -6,8 +6,16 @@ from backend.data_classes import PriorityLevel
 
 
 class TaskCard:
-    def __init__(self, id_: int, name: str, parent, description: str = "", due_date: datetime | None = None, repeat=None,
-                 priority: PriorityLevel = PriorityLevel.NO):
+    def __init__(
+            self,
+            id_: int,
+            name: str,
+            parent,
+            due_date: datetime,
+            description: str = "",
+            repeat=None,
+            priority: PriorityLevel = PriorityLevel.NO
+    ):
         self.id = id_
         self.name = name
         self.parent = parent
@@ -22,7 +30,7 @@ class TaskCard:
         data["name"] = self.name
         data["parent"] = self.parent.id
         data["description"] = self.description
-        data["due_date"] = self.due_date
+        data["due_date"] = str(self.due_date)
         data["repeat"] = self.repeat
         data["priority"] = self.priority.value
 

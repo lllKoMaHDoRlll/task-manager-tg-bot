@@ -15,19 +15,19 @@ class Folder:
 
     def load(self, path: Path) -> None:
         if path.exists():
-            try:
-                with open(path, "r") as file:
-                    data = json.load(file)
+            #try:
+            with open(path, "r") as file:
+                data = json.load(file)
 
-                for task_id in data:
-                    self.add_task(**(data[task_id]))
-            except Exception:
-                raise LoadFailed("Error while loading tasks")
+            for task_id in data:
+                self.add_task(**(data[task_id]))
+            # except Exception:
+            #     raise LoadFailed("Error while loading tasks")
         else:
             raise LoadFailed("Tasks' data file not exists")
 
     def save(self, path: Path) -> None:
-        json.dump({task.id: task.get_attrs() for task in self.active_tasks}, path.open("w"), indent=4)
+        json.dump({task.id: task.get_attrs() for task in self.active_tasks.values()}, path.open("w"), indent=4)
 
     def get_tasks_amount(self) -> int:
         return self.active_tasks.__len__()
@@ -44,10 +44,34 @@ class Folder:
             if task.id == id_:
                 return task
 
-    def add_task(self, name: str, description: str = "", due_date: datetime | None = None, repeat=None,
+    def add_task(self, name: str, description: str = "", due_date: str | None = None, repeat=None,
                  priority: int = 4, **kwargs) -> TaskCard:
-        task = TaskCard(self.get_available_task_id(), name, self, description, due_date, repeat, PriorityLevel(int(priority)))
+        due_date = datetime.fromisoformat(due_date)
+        task = TaskCard(
+            id_=self.get_available_task_id(),
+            name=name,
+            parent=self,
+            due_date=due_date,
+            description=description,
+            repeat=repeat,
+            priority=PriorityLevel(int(priority))
+        )
         self.active_tasks.update({task.id: task})
+        return task
+
+    def add_new_task(self, name: str, description: str = "", due_date: datetime | None = None, repeat=None,
+                     priority: int = 4, **kwargs) -> TaskCard:
+        task = TaskCard(
+            id_=self.get_available_task_id(),
+            name=name,
+            parent=self,
+            due_date=due_date,
+            description=description,
+            repeat=repeat,
+            priority=PriorityLevel(int(priority))
+        )
+        self.active_tasks.update({task.id: task})
+        self.save(Path(r"C:\Users\aleks\PycharmProjects\TG-TaskManager\data\tasks\{0}\{1}.json".format(self.user_id, self.id)))
         return task
 
     def remove_task(self, task: TaskCard) -> None:
