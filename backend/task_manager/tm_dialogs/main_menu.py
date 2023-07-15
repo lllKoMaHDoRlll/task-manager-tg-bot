@@ -63,6 +63,10 @@ class TaskManagerMainMenu:
             self.show_task_command,
             StateFilter(FSMTaskManager.select_folder_action), Text(startswith="taskid")
         )
+        dispatcher.callback_query.register(
+            self.proceed_task_completion,
+            StateFilter(FSMTaskManager.select_task_action), Text(startswith="completetask")
+        )
 
     @staticmethod
     async def proceed_exit_command(message: Message | CallbackQuery, state: FSMContext):
@@ -281,6 +285,11 @@ class TaskManagerMainMenu:
         ]
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
         return keyboard
+
+    async def proceed_task_completion(self, callback: CallbackQuery, state: FSMContext):
+        task: TaskCard = (await state.get_data())["selected_task"]
+        await self.task_manager_handler.complete_task(task)
+        await callback.answer(text=labels.TASK_COMPLETE)
 
 
 class FSMTaskManager(StatesGroup):

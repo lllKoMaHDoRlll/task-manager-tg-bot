@@ -59,4 +59,4 @@ ADD_TASK_ABORT = "❌ Task wasn't added."
 YES_BUTTON = "✅"
 NO_BUTTON = "❌"
 
-
+TASK_COMPLETE = "✅ Task was completed."

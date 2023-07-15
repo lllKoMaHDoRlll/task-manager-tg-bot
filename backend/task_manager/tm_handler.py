@@ -4,7 +4,7 @@ from typing import NoReturn
 
 from backend.exceptions import LoadFailed, FolderNotFound
 from backend.task_manager.folder import Folder
-
+from backend.task_manager.task_card import TaskCard
 from backend.task_manager.scheduler import TaskScheduler
 
 
@@ -88,3 +88,7 @@ class TaskManagerHandler:
 
     async def schedule_task(self, task, chat_id):
         await self.task_scheduler.schedule_task(task, chat_id)
+
+    async def complete_task(self, task: TaskCard) -> None:
+        await self.task_scheduler.remove_schedule_task(task)
+        task.delete()

@@ -22,6 +22,7 @@ class TaskCard:
         self.due_date = due_date
         self.repeat = repeat
         self.priority = priority
+        self.schedule_job_id: int | None = None
 
     def get_attrs(self) -> dict:
         data = dict()
@@ -63,4 +64,4 @@ class TaskCard:
         self.parent.remove_task(self)
 
     def complete(self) -> NoReturn:
-        raise NotImplemented
+        self.parent.complete(self)
