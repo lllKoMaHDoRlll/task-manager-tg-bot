@@ -1,4 +1,5 @@
 import json
+import os
 import aiohttp
 from pathlib import Path
 from typing import NoReturn
@@ -16,6 +17,7 @@ def get_config(config_path: Path = Path("./data/config.json")) -> ConfigData:
         try:
             with open(config_path, "r") as file:
                 config_data = json.load(file)
+                config_data.update({"token": os.getenv("TOKEN")})
             config_data = ConfigData(**config_data)
             return config_data
         except Exception:
