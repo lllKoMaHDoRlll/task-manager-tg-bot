@@ -25,14 +25,14 @@ class TaskCard:
         self.schedule_job_id: int | None = None
 
     def get_attrs(self) -> dict:
-        data = dict()
-        data["id"] = self.id
+        data: dict[str, str] = dict()
+        data["id"] = str(self.id)
         data["name"] = self.name
-        data["parent"] = self.parent.id
+        data["parent"] = str(self.parent.id)
         data["description"] = self.description
         data["due_date"] = str(self.due_date)
         data["repeat"] = self.repeat
-        data["priority"] = self.priority.value
+        data["priority"] = str(self.priority.value)
 
         return data
 
@@ -60,8 +60,8 @@ class TaskCard:
         self.priority = new_priority
         return self.priority
 
-    def delete(self) -> NoReturn:
+    def delete(self) -> None:
         self.parent.remove_task(self)
 
-    def complete(self) -> NoReturn:
+    def complete(self) -> None:
         self.parent.complete(self)

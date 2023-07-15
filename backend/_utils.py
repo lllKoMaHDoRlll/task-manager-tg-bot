@@ -33,15 +33,15 @@ async def make_request_get(url: str, params: dict | None = None) -> str | NoRetu
 
 def format_repeat_time(repeat_text: str) -> int | NoReturn:
     try:
-        repeat_text = repeat_text.split()
-        if repeat_text[0] != 'every':
+        repeat_text_ = repeat_text.split()
+        if repeat_text_[0] != 'every':
             raise RepeatTimeFormattingFailed("First word must be every")
-        if repeat_text[1] == 'day':
+        if repeat_text_[1] == 'day':
             delta = 86400
-        elif repeat_text[1] in WEEKDAYS:
+        elif repeat_text_[1] in WEEKDAYS:
             delta = 86400 * 7
-        elif repeat_text[1].isdecimal() and repeat_text[2] == 'days':
-            delta = 86400 * int(repeat_text[1])
+        elif repeat_text_[1].isdecimal() and repeat_text_[2] == 'days':
+            delta = 86400 * int(repeat_text_[1])
         else:
             raise RepeatTimeFormattingFailed("Invalid repeat text format")
 

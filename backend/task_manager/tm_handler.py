@@ -10,13 +10,13 @@ from backend.task_manager.scheduler import TaskScheduler
 
 class TaskManagerHandler:
     def __init__(self, data_path: Path, task_scheduler: TaskScheduler):
-        self.folders = dict()
+        self.folders: dict[int, list[Folder]] = dict()
         self.data_path = data_path
         self.task_scheduler = task_scheduler
 
     def get_folders_by_user_id(self, user_id: int) -> dict:
-        if str(user_id) in self.folders.keys():
-            return {user_id: self.folders[str(user_id)]}
+        if user_id in self.folders.keys():
+            return {user_id: self.folders[user_id]}
         else:
             return {user_id: []}
 
@@ -24,20 +24,20 @@ class TaskManagerHandler:
         folders_path = self.data_path.joinpath(str(user_id))
 
         if not folders_path.exists():
-            self.folders.update({str(user_id): []})
+            self.folders.update({user_id: []})
             os.mkdir(folders_path)
 
         folder_id = self._get_available_folder_id(folders_path)
         folder = Folder(user_id, folder_id, self.data_path.joinpath(str(user_id)).joinpath("{}.json".format(folder_id)))
 
-        self.folders[str(user_id)].append(folder)
+        self.folders[user_id].append(folder)
 
         folder.save()
 
     def delete_folder(self, folder: Folder):
         folders_path = self.data_path.joinpath(str(folder.user_id)).joinpath(f"{str(folder.id)}.json")
         os.remove(folders_path)
-        self.folders[str(folder.user_id)].remove(folder)
+        self.folders[folder.user_id].remove(folder)
 
     def load(self):
         if self.data_path.exists():
@@ -55,7 +55,7 @@ class TaskManagerHandler:
                         folder.load(path_to_folder)
                         folders.append(folder)
 
-                    self.folders.update({user_id: folders})
+                    self.folders.update({int(user_id): folders})
 
             except Exception as ex:
                 raise LoadFailed("Error while loading folders")

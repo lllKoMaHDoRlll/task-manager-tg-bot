@@ -48,14 +48,16 @@ class TaskManagerNewTask:
             self.proceed_add_task,
             StateFilter(FSMTaskManagerNewTask.new_task_request_confirm), Text(startswith="confirm")
         )
+
     @staticmethod
     async def add_task_request_name_command(callback: CallbackQuery, state: FSMContext):
-        await state.update_data(new_task={})
+        if callback.message:
+            await state.update_data(new_task={})
 
-        message = await callback.message.answer(labels.REQUEST_TASK_NAME)
-        await state.update_data(new_task_message=message)
+            message = await callback.message.answer(labels.REQUEST_TASK_NAME)
+            await state.update_data(new_task_message=message)
 
-        await state.set_state(FSMTaskManagerNewTask.new_task_request_name)
+            await state.set_state(FSMTaskManagerNewTask.new_task_request_name)
 
     @staticmethod
     async def add_task_request_description_command(message: Message, state: FSMContext):
@@ -126,7 +128,10 @@ class TaskManagerNewTask:
         await state.set_state(FSMTaskManagerNewTask.new_task_request_priority)
 
     @staticmethod
-    async def add_task_confirm(callback: CallbackQuery, state: FSMContext):
+    async def add_task_confirm(callback: CallbackQuery, state: FSMContext) -> None:
+        if not callback.data:
+            return None
+
         (await state.get_data())["new_task"].update({"priority": callback.data.split('_')[1]})
         task_data = (await state.get_data())["new_task"]
 
@@ -157,7 +162,10 @@ class TaskManagerNewTask:
         await new_task_message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_markup))
         await state.set_state(FSMTaskManagerNewTask.new_task_request_confirm)
 
-    async def proceed_add_task(self, callback: CallbackQuery, state: FSMContext):
+    async def proceed_add_task(self, callback: CallbackQuery, state: FSMContext) -> None:
+        if not callback.data:
+            return None
+
         match callback.data.split("_")[1]:
             case "yes":
                 folder: Folder = (await state.get_data())["selected_folder"]

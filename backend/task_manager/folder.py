@@ -12,7 +12,7 @@ class Folder:
         self.user_id = user_id
         self.id = id_
         self.data_path = data_path
-        self.active_tasks = dict()
+        self.active_tasks: dict[int, TaskCard] = dict()
 
     def load(self, path: Path) -> None:
         if path.exists():
@@ -40,12 +40,13 @@ class Folder:
                 return index
         return len(tasks_ids)
 
-    def get_task_by_id(self, id_: int) -> TaskCard:
+    def get_task_by_id(self, id_: int) -> TaskCard | None:
         for task in self.active_tasks.values():
             if task.id == id_:
                 return task
+        return None
 
-    def _add_task(self, name: str, description: str = "", due_date: str | datetime = None, repeat=None,
+    def _add_task(self, name: str, due_date: datetime, description: str = "", repeat: str | None = None,
                   priority: int = 4, **kwargs) -> TaskCard:
         if isinstance(due_date, str):
             due_date = datetime.fromisoformat(due_date)
@@ -61,7 +62,7 @@ class Folder:
         self.active_tasks.update({task.id: task})
         return task
 
-    def add_new_task(self, name: str, description: str = "", due_date: datetime | None = None, repeat=None,
+    def add_new_task(self, name: str, due_date: datetime, description: str = "", repeat=None,
                      priority: int = 4, **kwargs) -> TaskCard:
         task = self._add_task(
             name=name,

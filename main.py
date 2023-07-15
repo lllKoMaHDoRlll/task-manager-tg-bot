@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta, datetime
 
 from aiogram import Dispatcher, Bot
 from aiogram.filters import Command, Text
@@ -14,7 +15,7 @@ from backend.task_manager.task_card import TaskCard
 from backend.task_manager.folder import Folder
 from backend.task_manager.labels import (
     TASK_FRAME, COMPLETE_TASK_BUTTON, DELETE_TASK_BUTTON, TASK_SNOOZE_BUTTON, TASK_COMPLETE_NOTIFICATION,
-    NOT_IMPLEMENTED_ALERT, TASK_DELETE_NOTIFICATION
+    NOT_IMPLEMENTED_ALERT, TASK_DELETE_NOTIFICATION, TASK_SNOOZE_NOTIFICATION
 )
 
 
@@ -79,22 +80,41 @@ class MyBot:
         await self.bot.send_message(chat_id=chat_id, text=msg_text, reply_markup=keyboard)
 
     async def proceed_ncomplete_task(self, callback: CallbackQuery):
+        if not callback.data or not callback.message:
+            return None
         action, folder_id, task_id = callback.data.split("_")
         user_id = callback.from_user.id
         folder: Folder = self.task_manager_handler.get_folder_by_folder_id(int(user_id), int(folder_id))
-        task: TaskCard = folder.get_task_by_id(int(task_id))
+        task = folder.get_task_by_id(int(task_id))
+        if not task:
+            return None
         await self.task_manager_handler.complete_task(task)
         await callback.answer(text=TASK_COMPLETE_NOTIFICATION)
         await callback.message.delete()
 
     async def proceed_nsnooze_task(self, callback: CallbackQuery):
-        await callback.answer(text=NOT_IMPLEMENTED_ALERT)
-
-    async def proceed_ndelete_task(self, callback: CallbackQuery):
+        if not callback.data or not callback.message:
+            return None
         action, folder_id, task_id = callback.data.split("_")
         user_id = callback.from_user.id
         folder: Folder = self.task_manager_handler.get_folder_by_folder_id(int(user_id), int(folder_id))
-        task: TaskCard = folder.get_task_by_id(int(task_id))
+        task = folder.get_task_by_id(int(task_id))
+        if not task:
+            return None
+        task.due_date = datetime.now() + timedelta(minutes=5)
+        await self.task_scheduler.schedule_task(task, chat_id=callback.from_user.id)
+        await callback.answer(text=TASK_SNOOZE_NOTIFICATION)
+        await callback.message.delete()
+
+    async def proceed_ndelete_task(self, callback: CallbackQuery):
+        if not callback.data or not callback.message:
+            return None
+        action, folder_id, task_id = callback.data.split("_")
+        user_id = callback.from_user.id
+        folder: Folder = self.task_manager_handler.get_folder_by_folder_id(int(user_id), int(folder_id))
+        task = folder.get_task_by_id(int(task_id))
+        if not task:
+            return None
         task.delete()
         await callback.answer(text=TASK_DELETE_NOTIFICATION)
         await callback.message.delete()

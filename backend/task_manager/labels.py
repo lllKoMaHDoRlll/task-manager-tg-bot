@@ -62,3 +62,4 @@ NO_BUTTON = "❌"
 TASK_COMPLETE_NOTIFICATION = "✅ Task was completed."
 TASK_SNOOZE_BUTTON = "snooze task"  # TODO
 TASK_DELETE_NOTIFICATION = "task was deleted"  # TODO
+TASK_SNOOZE_NOTIFICATION = "task was snoozed by 5 minutes"  # TODO

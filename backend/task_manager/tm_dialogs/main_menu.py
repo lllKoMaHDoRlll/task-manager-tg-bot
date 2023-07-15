@@ -73,11 +73,13 @@ class TaskManagerMainMenu:
         left_message = await message.answer(labels.EXIT_DIALOG)
         await sleep(0.5)
         await (await state.get_data())["message"].delete()
-        if isinstance(message, Message):
+        if isinstance(message, Message) and isinstance(left_message, Message):
             await left_message.delete()
         await state.clear()
 
-    async def show_folders_command(self, message: Message, state: FSMContext):
+    async def show_folders_command(self, message: Message, state: FSMContext) -> None:
+        if not message.from_user:
+            return None
         folders = self.task_manager_handler.get_folders_by_user_id(message.from_user.id)[message.from_user.id]
 
         msg_text = self.get_text_show_folders(folders)
@@ -138,6 +140,8 @@ class TaskManagerMainMenu:
         await self.update_show_folders_command(callback, state)
 
     async def show_folder_command(self, callback: CallbackQuery, state: FSMContext):
+        if not callback.data or not callback.message:
+            return None
         selected_folder = self.task_manager_handler.get_folder_by_folder_id(
             user_id=callback.from_user.id,
             folder_id=int(callback.data.split("_")[1])
@@ -166,7 +170,7 @@ class TaskManagerMainMenu:
         await state.update_data(message=main_message)
 
     @staticmethod
-    def get_text_show_folder(tasks: dict[int:TaskCard], folder_id: int) -> str:
+    def get_text_show_folder(tasks: dict[int, TaskCard], folder_id: int) -> str:
         msg_text = labels.SHOW_FOLDER_TITLE.format(folder_id=folder_id)
 
         if tasks:
@@ -184,7 +188,7 @@ class TaskManagerMainMenu:
         return msg_text
 
     @staticmethod
-    def get_keyboard_show_folder(tasks: dict[int:TaskCard]) -> InlineKeyboardMarkup:
+    def get_keyboard_show_folder(tasks: dict[int, TaskCard]) -> InlineKeyboardMarkup:
         add_task_button = InlineKeyboardButton(text=labels.ADD_TASK_BUTTON, callback_data="addtask")
         edit_folder_button = InlineKeyboardButton(text=labels.EDIT_FOLDER_BUTTON, callback_data="editfolder")
         delete_folder_button = InlineKeyboardButton(text=labels.DELETE_FOLDER_BUTTON, callback_data="deletefolder")
@@ -229,9 +233,14 @@ class TaskManagerMainMenu:
                 await self.update_show_folder_command(callback, state)
 
     async def show_task_command(self, callback: CallbackQuery, state: FSMContext):
+        if not callback.data:
+            return None
+
         task_id = int(callback.data.split("_")[1])
         selected_folder: Folder = (await state.get_data())["selected_folder"]
         selected_task = selected_folder.get_task_by_id(task_id)
+        if not selected_task:
+            return None
         main_message: Message = (await state.get_data())["message"]
 
         await state.update_data(selected_task=selected_task)

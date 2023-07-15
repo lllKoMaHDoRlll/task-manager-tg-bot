@@ -15,15 +15,15 @@ class TaskScheduler:
         self.bot = bot
         self.send_notification = send_notification
 
-    async def run(self):
+    async def run(self) -> None:
         self.scheduler.start()
 
-    async def schedule_folders(self, folders: dict[int:Folder]) -> None:
+    async def schedule_folders(self, folders: dict[int, list[Folder]]) -> None:
         for user_id in folders:
             for folder in folders[user_id]:
                 await self.schedule_folder(folder.active_tasks, user_id)
 
-    async def schedule_folder(self, tasks: dict[int:TaskCard], chat_id: int) -> None:
+    async def schedule_folder(self, tasks: dict[int, TaskCard], chat_id: int) -> None:
         for task in tasks.values():
             await self.schedule_task(task, chat_id)
 
