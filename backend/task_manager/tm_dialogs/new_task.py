@@ -50,14 +50,15 @@ class TaskManagerNewTask:
         )
 
     @staticmethod
-    async def add_task_request_name_command(callback: CallbackQuery, state: FSMContext):
-        if callback.message:
+    async def add_task_request_name_command(query: CallbackQuery, state: FSMContext):
+        if query.message:
             await state.update_data(new_task={})
 
-            message = await callback.message.answer(labels.REQUEST_TASK_NAME)
+            message = await query.message.answer(labels.REQUEST_TASK_NAME)
             await state.update_data(new_task_message=message)
 
             await state.set_state(FSMTaskManagerNewTask.new_task_request_name)
+            print(state)
 
     @staticmethod
     async def add_task_request_description_command(message: Message, state: FSMContext):
@@ -181,7 +182,7 @@ class TaskManagerNewTask:
 
         await state.update_data(new_task=None)
         await state.update_data(new_task_message=None)
-        await self.on_exit(callback, state)
+        await self.on_exit(state)
 
 
 class FSMTaskManagerNewTask(StatesGroup):
