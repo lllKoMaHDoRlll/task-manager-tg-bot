@@ -4,6 +4,7 @@ from typing import Callable
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.date import DateTrigger
+from apscheduler.jobstores.base import JobLookupError
 
 from backend.task_manager.task_card import TaskCard
 from backend.task_manager.folder import Folder
@@ -35,4 +36,7 @@ class TaskScheduler:
 
     async def remove_schedule_task(self, task: TaskCard) -> None:
         if task.schedule_job_id:
-            self.scheduler.remove_job(str(task.schedule_job_id))
+            try:
+                self.scheduler.remove_job(str(task.schedule_job_id))
+            except JobLookupError:
+                pass
