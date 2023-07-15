@@ -12,7 +12,7 @@ from backend.task_manager.folder import Folder
 from backend.task_manager.task_card import TaskCard
 from backend.task_manager.tm_handler import TaskManagerHandler
 from backend.task_manager import labels
-from backend.task_manager.tm_dialogs.new_task import FSMTaskManagerNewTask, TaskManagerNewTask
+from backend.task_manager.tm_dialogs.new_task import TaskManagerNewTask
 
 
 class TaskManagerMainMenu:
@@ -243,7 +243,6 @@ class TaskManagerMainMenu:
 
         await state.set_state(FSMTaskManager.select_task_action)
 
-
     @staticmethod
     def get_text_show_task(task: TaskCard):
         msg_text = labels.TASK_FRAME.format(
@@ -287,9 +286,18 @@ class TaskManagerMainMenu:
         return keyboard
 
     async def proceed_task_completion(self, callback: CallbackQuery, state: FSMContext):
+        message: Message = (await state.get_data())["message"]
+        folder: Folder = (await state.get_data())["selected_folder"]
         task: TaskCard = (await state.get_data())["selected_task"]
         await self.task_manager_handler.complete_task(task)
         await callback.answer(text=labels.TASK_COMPLETE)
+
+        msg_text = self.get_text_show_folder(folder_id=folder.id, tasks=folder.active_tasks)
+        keyboard = self.get_keyboard_show_folder(folder.active_tasks)
+
+        await message.edit_text(text=msg_text)
+        await message.edit_reply_markup(reply_markup=keyboard)
+        await state.set_state(FSMTaskManager.select_folder_action)
 
 
 class FSMTaskManager(StatesGroup):
