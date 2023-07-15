@@ -75,6 +75,7 @@ class Folder:
 
     def remove_task(self, task: TaskCard) -> None:
         self.active_tasks.pop(task.id)
+        self.save()
 
     def complete_task(self, task: TaskCard) -> None:
         self.remove_task(task)
