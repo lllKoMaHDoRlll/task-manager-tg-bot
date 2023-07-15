@@ -59,4 +59,6 @@ ADD_TASK_ABORT = "❌ Task wasn't added."
 YES_BUTTON = "✅"
 NO_BUTTON = "❌"
 
-TASK_COMPLETE = "✅ Task was completed."
+TASK_COMPLETE_NOTIFICATION = "✅ Task was completed."
+TASK_SNOOZE_BUTTON = "snooze task"  # TODO
+TASK_DELETE_NOTIFICATION = "task was deleted"  # TODO

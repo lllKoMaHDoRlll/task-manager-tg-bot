@@ -4,12 +4,8 @@ import aiohttp
 from pathlib import Path
 from typing import NoReturn
 
-from aiogram import Bot
-
 from backend.data_classes import ConfigData, WEEKDAYS
 from backend.exceptions import ConfigLoadFailed, MakingRequestFailed, RepeatTimeFormattingFailed
-from backend.task_manager.task_card import TaskCard
-from backend.task_manager.labels import TASK_FRAME
 
 
 def get_config(config_path: Path = Path("./data/config.json")) -> ConfigData:
@@ -52,14 +48,3 @@ def format_repeat_time(repeat_text: str) -> int | NoReturn:
         return delta
     except Exception:
         raise RepeatTimeFormattingFailed("Error with formatting repeat text")
-
-
-async def send_notification(bot: Bot, chat_id: int, task: TaskCard):
-    msg_text = TASK_FRAME.format(
-        name=task.name,
-        priority=task.priority,
-        description=task.description,
-        due_date=task.due_date,
-        repeat=task.repeat
-    )
-    await bot.send_message(chat_id=chat_id, text=msg_text)

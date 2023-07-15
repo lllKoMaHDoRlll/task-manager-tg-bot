@@ -1,18 +1,19 @@
 from datetime import datetime
+from typing import Callable
 
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.date import DateTrigger
 
-from backend._utils import send_notification
 from backend.task_manager.task_card import TaskCard
 from backend.task_manager.folder import Folder
 
 
 class TaskScheduler:
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: Bot, send_notification: Callable):
         self.scheduler = AsyncIOScheduler()
         self.bot = bot
+        self.send_notification = send_notification
 
     async def run(self):
         self.scheduler.start()
@@ -27,11 +28,10 @@ class TaskScheduler:
             await self.schedule_task(task, chat_id)
 
     async def schedule_task(self, task: TaskCard, chat_id: int) -> None:
-        if task.due_date < datetime.now():
-            return None
-        trigger = DateTrigger(task.due_date)
-        job = self.scheduler.add_job(send_notification, trigger=trigger, args=(self.bot, chat_id, task, ))
-        task.schedule_job_id = job.id
+        if task.due_date > datetime.now():
+            trigger = DateTrigger(task.due_date)
+            job = self.scheduler.add_job(self.send_notification, trigger=trigger, args=(chat_id, task, ))
+            task.schedule_job_id = job.id
 
     async def remove_schedule_task(self, task: TaskCard) -> None:
         if task.schedule_job_id:

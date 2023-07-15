@@ -290,7 +290,7 @@ class TaskManagerMainMenu:
         folder: Folder = (await state.get_data())["selected_folder"]
         task: TaskCard = (await state.get_data())["selected_task"]
         await self.task_manager_handler.complete_task(task)
-        await callback.answer(text=labels.TASK_COMPLETE)
+        await callback.answer(text=labels.TASK_COMPLETE_NOTIFICATION)
 
         msg_text = self.get_text_show_folder(folder_id=folder.id, tasks=folder.active_tasks)
         keyboard = self.get_keyboard_show_folder(folder.active_tasks)
